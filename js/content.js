@@ -13,6 +13,9 @@ window.SITE = {
       "PixelXYZ像素空间 — 一个兴趣使然创办的数码频道。「pixel infinity, advance courageously / 像素无限，一往无前」",
     favicon: "assets/favicon.svg",
     theme: "dark",
+    /* 构建版本：每次发布改这里，并同步改 sw.js 的 VERSION。
+       页面加载时会在控制台输出，用来确认浏览器拿到的是不是最新版 */
+    build: "2026-10-05.4",
   },
 
   /* ---------- 特效开关 ---------- */

@@ -16,7 +16,7 @@
  * 想彻底重置缓存（含图片）：改下面的 VERSION。
  * ==========================================================================*/
 
-const VERSION = "2026-10-05.3";
+const VERSION = "2026-10-05.4";
 const CACHE = "pixelxyz-" + VERSION;
 
 /* 代码 / 数据类：必须优先取最新 */
@@ -82,7 +82,10 @@ self.addEventListener("fetch", (e) => {
         const c = await caches.open(CACHE);
         const key = isHTML ? "index.html" : req;
         try {
-          const fresh = await fetch(req);
+          /* cache:"reload" —— 绕过浏览器 HTTP 缓存
+             （GitHub Pages 给 CSS/JS 设了 max-age=600，光靠 network-first 仍可能
+               读到最多 10 分钟前的旧文件，用户就会以为「改了没生效」） */
+          const fresh = await fetch(req, { cache: "reload" });
           if (fresh && fresh.status === 200 && fresh.type === "basic") {
             c.put(key, fresh.clone());
           }

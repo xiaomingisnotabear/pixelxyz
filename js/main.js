@@ -57,6 +57,10 @@
       if (v != null) node.textContent = v;
     });
     if (S.meta) {
+      if (S.meta.build) {
+        document.documentElement.setAttribute("data-build", S.meta.build);
+        if (window.console && console.info) console.info("PixelXYZ 构建版本 " + S.meta.build);
+      }
       if (S.meta.title) document.title = S.meta.title;
       if (S.meta.description) { var m = $('meta[name="description"]'); if (m) m.setAttribute("content", S.meta.description); }
       if (S.meta.lang) document.documentElement.setAttribute("lang", S.meta.lang);
