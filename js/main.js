@@ -223,8 +223,20 @@
     if (!("IntersectionObserver" in window)) { start(); return; }
     var io = new IntersectionObserver(function (es) {
       es.forEach(function (e) { if (e.isIntersecting) { io.disconnect(); start(); } });
-    }, { threshold: 0.25 });
+    }, { threshold: 0 });
     io.observe($("#terminal"));
+
+    /* 兜底：快速滚动/锚点跳转跳过触发点时，也能补上 */
+    function byScroll() {
+      var t = $("#terminal");
+      if (!t) return;
+      if (t.getBoundingClientRect().top < window.innerHeight * 0.92) {
+        window.removeEventListener("scroll", byScroll);
+        io.disconnect();
+        start();
+      }
+    }
+    window.addEventListener("scroll", byScroll, { passive: true });
   }
 
   /* ---------- 档案 ---------- */
@@ -440,30 +452,56 @@
     }
   }
 
+  /* ---------- 滚动兜底（防快速跳转漏触发） ---------- */
+  function initFallbacks() {
+    var ticking = false;
+    function check() {
+      ticking = false;
+      var vh = window.innerHeight;
+      $all("[data-reveal]:not(.is-in)").forEach(function (n) {
+        if (n.getBoundingClientRect().top < vh * 0.94) n.classList.add("is-in");
+      });
+      var fb = $("#focusBars");
+      if (fb && fb.getBoundingClientRect().top < vh * 0.9) animateBars();
+      $all(".stat[data-count]:not([data-counted])").forEach(function (c) {
+        if (c.getBoundingClientRect().top < vh * 0.95) runCounter(c);
+      });
+    }
+    window.addEventListener("scroll", function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(check); }
+    }, { passive: true });
+    window.addEventListener("resize", check, { passive: true });
+    check();
+  }
+
   /* ---------- 数字滚动 ---------- */
   function setNum(card, val) {
     var n = card.querySelector(".stat__value");
     if (n) n.textContent = fmtNum(val);
   }
+  function runCounter(card) {
+    if (card.getAttribute("data-counted")) return;
+    card.setAttribute("data-counted", "1");
+    var target = Number(card.getAttribute("data-count")) || 0;
+    if (reduceMotion) { setNum(card, target); return; }
+    var start = null, dur = 1500;
+    requestAnimationFrame(function step(ts) {
+      if (!start) start = ts;
+      var p = Math.min((ts - start) / dur, 1);
+      setNum(card, Math.round(target * easeOutCubic(p)));
+      if (p < 1) requestAnimationFrame(step);
+    });
+  }
+
   function initCounters() {
     var cards = $all(".stat[data-count]");
     if (!cards.length) return;
-    if (reduceMotion || !("IntersectionObserver" in window)) {
-      cards.forEach(function (c) { setNum(c, Number(c.getAttribute("data-count"))); });
-      return;
-    }
+    if (!("IntersectionObserver" in window)) { cards.forEach(runCounter); return; }
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
         if (!en.isIntersecting) return;
-        var card = en.target, target = Number(card.getAttribute("data-count"));
-        io.unobserve(card);
-        var start = null, dur = 1500;
-        requestAnimationFrame(function step(ts) {
-          if (!start) start = ts;
-          var p = Math.min((ts - start) / dur, 1);
-          setNum(card, Math.round(target * easeOutCubic(p)));
-          if (p < 1) requestAnimationFrame(step);
-        });
+        io.unobserve(en.target);
+        runCounter(en.target);
       });
     }, { threshold: 0.4 });
     cards.forEach(function (c) { io.observe(c); });
@@ -554,6 +592,7 @@
     initMenu();
     initScroll();
     initReveal();
+    initFallbacks();
     initCounters();
     initPointer();
     initCursor();
