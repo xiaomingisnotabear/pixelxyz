@@ -320,14 +320,10 @@
     var badge = (w.platform && w.platform !== "bilibili")
       ? '<span class="work__badge">' + esc(PLATFORM_LABEL[w.platform] || "") + "</span>" : "";
 
-    var meta = "";
-    if (w.kind === "video") {
-      meta = "<span>" + I.eye + fmtNum(w.views) + "</span>" +
-             "<span>" + I.danmaku + fmtNum(w.danmaku) + "</span>" +
-             "<span>" + I.clock + esc(w.date || "") + "</span>";
-    } else if (w.kind === "article") {
-      meta = "<span>" + I.danmaku + "评论 " + fmtNum(w.comments) + "</span><span>图文</span>";
-    }
+    var meta =
+      "<span>" + I.eye + fmtNum(w.views) + "</span>" +
+      "<span>" + I.danmaku + fmtNum(w.danmaku) + "</span>" +
+      "<span>" + I.clock + esc(w.date || "") + "</span>";
 
     var dim = wall ? ' width="300" height="400"' : ' width="640" height="360"';
     a.innerHTML =
@@ -437,12 +433,7 @@
 
       var head = el("div", "platform__head");
       var av = el("div", "platform__avatar" + (pf.icon ? " platform__avatar--" + pf.icon : ""));
-      if (pf.avatar) {
-        var img = el("img"); img.src = pf.avatar; img.alt = pf.name || ""; img.loading = "lazy";
-        av.appendChild(img);
-      } else {
-        av.innerHTML = I[pf.icon] || I.link;
-      }
+      av.innerHTML = I[pf.icon] || I.link;
       var meta = el("div", "platform__meta");
       meta.appendChild(el("div", "platform__name", esc(pf.name)));
       meta.appendChild(el("div", "platform__handle", esc(pf.handle || "")));
