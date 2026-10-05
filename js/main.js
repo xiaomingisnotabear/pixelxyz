@@ -226,7 +226,10 @@
       /* 无动画模式：一次性渲染 */
       if (noType) {
         lines.forEach(function (l) {
-          body.appendChild(el("span", "tline tline--" + (l.type === "cmd" ? "cmd" : "out"), esc(l.text)));
+          var node = el("span", "tline tline--" + (l.type === "cmd" ? "cmd" : "out"));
+          node.textContent = fillTokens(l.text);
+          if (hasToken(l.text)) node.setAttribute("data-tpl", l.text);
+          body.appendChild(node);
         });
         body.appendChild(caret);
         return;
@@ -242,7 +245,8 @@
 
         if (!isCmd) {
           /* 输出行：直接出现（像真实终端） */
-          node.textContent = l.text;
+          node.textContent = fillTokens(l.text);
+          if (hasToken(l.text)) node.setAttribute("data-tpl", l.text);
           setTimeout(nextLine, 190);
           return;
         }
@@ -308,6 +312,29 @@
   }
 
   var PLATFORM_LABEL = { bilibili: "哔哩哔哩", douyin: "抖音", xiaohongshu: "小红书" };
+
+  /* ---------- 文案占位符：{fans} / {likes} / {platforms} ----------
+     终端简介里的数据直接取自 S.stats.totals，数据同步后会自动刷新，避免写死过期 */
+  function statsMap() {
+    var map = {};
+    ((S.stats && S.stats.totals) || []).forEach(function (t) {
+      if (t.key) map[t.key] = fmtFull(t.value);
+    });
+    return map;
+  }
+  function hasToken(text) { return /\{(\w+)\}/.test(String(text == null ? "" : text)); }
+  function fillTokens(text) {
+    var map = statsMap();
+    return String(text == null ? "" : text).replace(/\{(\w+)\}/g, function (raw, key) {
+      return Object.prototype.hasOwnProperty.call(map, key) ? map[key] : raw;
+    });
+  }
+  /* 数据同步完成后，把已经渲染出来的占位符行更新掉 */
+  function refreshTokenLines() {
+    $all("#terminalBody [data-tpl]").forEach(function (n) {
+      n.textContent = fillTokens(n.getAttribute("data-tpl"));
+    });
+  }
 
   function workCard(w, i) {
     var wall = w.kind === "clip";
@@ -757,6 +784,7 @@
       S.stats.note = "数据每日自动同步自哔哩哔哩、抖音、小红书公开主页 · 更新于 " + String(d.updated).slice(0, 10);
     }
 
+    refreshTokenLines();
     rerenderStats();
   }
 
