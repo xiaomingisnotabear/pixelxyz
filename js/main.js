@@ -788,6 +788,19 @@
   function initServiceWorker() {
     if (!("serviceWorker" in navigator)) return;
     if (location.protocol !== "https:" && location.hostname !== "localhost" && location.hostname !== "127.0.0.1") return;
+
+    /* 页面已被旧版 SW 接管时，新版本接管（controllerchange）后自动刷新一次，
+       这样网站更新后打开即可看到新版，不必手动刷新两次。
+       首次安装时页面尚无 controller，不会触发，避免无谓刷新。 */
+    if (navigator.serviceWorker.controller) {
+      var reloaded = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function () {
+        if (reloaded) return;
+        reloaded = true;
+        location.reload();
+      });
+    }
+
     window.addEventListener("load", function () {
       navigator.serviceWorker.register("sw.js").catch(function () { /* 不支持则静默忽略 */ });
     });

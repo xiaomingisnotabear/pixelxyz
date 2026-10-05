@@ -28,6 +28,7 @@ window.SITE = {
   /* ---------- 品牌 ---------- */
   brand: {
     name: "PixelXYZ",
+    nameCn: "像素空间",              // 导航栏品牌中文名（跟在 PixelXYZ 后面）
     mark: "P",                      // logo 缺失时的字母回退
     logo: "assets/avatar.webp",      // 频道头像（导航 + 页脚）
   },
