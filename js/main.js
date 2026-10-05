@@ -521,22 +521,51 @@
   }
 
   /* ---------- 主题 / 菜单 ---------- */
+  /* 同步移动端浏览器地址栏配色（iOS/Android 的状态栏会跟随这个色） */
+  function syncThemeColor() {
+    var meta = $('meta[name="theme-color"]');
+    if (!meta) return;
+    var dark = document.documentElement.getAttribute("data-theme") !== "light";
+    meta.setAttribute("content", dark ? "#0b0b0b" : "#fbfbfa");
+  }
+
   function initTheme() {
+    syncThemeColor();
     var btn = $("#themeToggle"); if (!btn) return;
     btn.addEventListener("click", function () {
       var cur = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
       document.documentElement.setAttribute("data-theme", cur);
       try { localStorage.setItem("theme", cur); } catch (e) {}
+      syncThemeColor();
     });
   }
+
   function initMenu() {
-    var nav = $("#nav"), burger = $("#navBurger"); if (!nav || !burger) return;
+    var nav = $("#nav"), burger = $("#navBurger");
+    if (!nav || !burger) return;
+
+    function close() {
+      nav.classList.remove("is-open");
+      burger.setAttribute("aria-expanded", "false");
+    }
+
     burger.addEventListener("click", function () {
       var open = nav.classList.toggle("is-open");
       burger.setAttribute("aria-expanded", open ? "true" : "false");
     });
+
+    /* 手机上点菜单外面、或按 Esc 都能收起（符合触摸端直觉） */
+    document.addEventListener("click", function (e) {
+      if (!nav.classList.contains("is-open")) return;
+      if (nav.contains(e.target)) return;   /* 点导航栏/菜单内部不关 */
+      close();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" || e.keyCode === 27) close();
+    });
+
     $all("#navLinks .nav__link").forEach(function (a) {
-      a.addEventListener("click", function () { nav.classList.remove("is-open"); burger.setAttribute("aria-expanded", "false"); });
+      a.addEventListener("click", close);
     });
   }
 

@@ -34,6 +34,8 @@ const FRESH = [
 const ASSETS = [
   "assets/favicon.svg",
   "assets/avatar.webp",
+  "assets/apple-touch-icon.png",
+  "manifest.webmanifest",
 ];
 
 const CODE_RE = /\.(?:css|js|mjs|json|webmanifest)$/i;

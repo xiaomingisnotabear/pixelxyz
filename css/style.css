@@ -37,6 +37,13 @@
   --nav-h: 60px;
   --container: 1140px;
 
+  /* 移动端安全区（刘海 / 灵动岛 / 底部横条 / 横屏圆角）
+     非全面屏设备上这些值都是 0，所以桌面端完全无副作用 */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-soft: cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -73,7 +80,16 @@
 
 /* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 20px); -webkit-text-size-adjust: 100%; }
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--nav-h) + var(--safe-top) + 20px);
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;   /* 点按不再闪灰色方块 */
+}
+
+/* 入场动画的 filter:blur 会外扩出「墨水溢出」，个别机型会表现为横向抖动。
+   clip 不会创建滚动容器（比 hidden 安全），只是把溢出裁掉 */
+html { overflow-x: clip; }
 
 body {
   margin: 0;
@@ -93,7 +109,10 @@ ul { margin: 0; padding: 0; list-style: none; }
 h1, h2, h3 { margin: 0; line-height: 1.14; letter-spacing: -0.028em; }
 button { font-family: inherit; }
 
-.container { width: 100%; max-width: var(--container); margin: 0 auto; padding: 0 28px; }
+.container {
+  width: 100%; max-width: var(--container); margin: 0 auto;
+  padding-left: calc(28px + var(--safe-l)); padding-right: calc(28px + var(--safe-r));
+}
 main, header, footer { position: relative; z-index: 1; }
 
 /* ============================================================================
@@ -210,7 +229,9 @@ main, header, footer { position: relative; z-index: 1; }
    导航（唯一保留的微妙玻璃）
    ==========================================================================*/
 .nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: var(--nav-h);
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  height: calc(var(--nav-h) + var(--safe-top));
+  padding: var(--safe-top) var(--safe-r) 0 var(--safe-l);
   border-bottom: 1px solid transparent;
   transition: background .35s var(--ease-soft), border-color .35s, backdrop-filter .35s;
 }
@@ -627,7 +648,9 @@ main, header, footer { position: relative; z-index: 1; }
 .cta-card__text { max-width: 32em; margin: 0 auto 34px; color: var(--text-2); font-size: 1rem; }
 .cta-card__actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; }
 
-.footer { border-top: 1px solid var(--border); padding: 32px 0 0; }
+.footer { border-top: 1px solid var(--border); padding: 32px 0 0;
+  padding-bottom: var(--safe-bot);
+}
 .footer__inner { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px; padding-bottom: 26px; }
 .footer__left { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-3); }
 .footer__slogan { margin: 0; font-size: 11px; font-weight: 400; letter-spacing: .2em; text-transform: uppercase; color: var(--text-3); }
@@ -648,7 +671,7 @@ main, header, footer { position: relative; z-index: 1; }
 .footer__mail-value:hover { color: var(--text); border-color: var(--border-2); }
 
 .to-top {
-  position: fixed; right: 24px; bottom: 24px; z-index: 90;
+  position: fixed; right: calc(24px + var(--safe-r)); bottom: calc(24px + var(--safe-bot)); z-index: 90;
   width: 40px; height: 40px; display: grid; place-items: center;
   border: 1px solid var(--border); border-radius: var(--radius-sm);
   background: color-mix(in srgb, var(--bg) 80%, transparent);
@@ -726,9 +749,9 @@ main, header, footer { position: relative; z-index: 1; }
 }
 
 @media (max-width: 720px) {
-  .container { padding: 0 20px; }
+  .container { padding-left: calc(20px + var(--safe-l)); padding-right: calc(20px + var(--safe-r)); }
   .nav__links {
-    position: fixed; top: var(--nav-h); left: 0; right: 0;
+    position: fixed; top: calc(var(--nav-h) + var(--safe-top)); left: 0; right: 0;
     flex-direction: column; align-items: stretch; gap: 2px; padding: 14px 20px 18px;
     background: color-mix(in srgb, var(--bg) 96%, transparent);
     backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
@@ -737,12 +760,14 @@ main, header, footer { position: relative; z-index: 1; }
     transition: transform .4s var(--ease), opacity .3s;
   }
   .nav.is-open .nav__links { transform: none; opacity: 1; pointer-events: auto; }
-  .nav__link { padding: 12px 14px; border-radius: var(--radius-sm); font-size: 15px; }
+  .nav__link { padding: 13px 14px; border-radius: var(--radius-sm); font-size: 15px; min-height: 46px; display: flex; align-items: center; }
   .nav__burger { display: flex; }
 
-  .section { padding: 88px 0; }
+  /* ---- 移动端留白收紧，少滚一点是一点 ---- */
+  .section { padding: 68px 0; }
   .stats { grid-template-columns: 1fr; }
-  .stat { padding: 32px 24px; }
+  .stat { padding: 28px 22px; }
+  .filters { margin-bottom: 24px; }
   .videos { grid-template-columns: 1fr; }
   .videos--wall { grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .platforms { grid-template-columns: 1fr; }
@@ -754,9 +779,67 @@ main, header, footer { position: relative; z-index: 1; }
   .cta-card { padding: 56px 24px; }
   .glow-avatar { width: min(210px, 56vw); }
   .hero__scroll { display: none; }
-  .to-top { right: 16px; bottom: 16px; }
+  .to-top { right: calc(16px + var(--safe-r)); bottom: calc(16px + var(--safe-bot)); }
   .cursor { display: none; }
+
+  /* 功能性小字在手机上提到 12px，装饰性英文小标题保持原样 */
+  .metric__label { font-size: 12px; letter-spacing: .08em; }
+  .video__dur { font-size: 12px; padding: 3px 8px; }
+  .platform__handle { font-size: 12px; }
+  .works__note, .stats__note { font-size: 12.5px; }
 }
+
+/* ============================================================================
+   触屏专属适配（hover: none = 没有鼠标的设备）
+   ==========================================================================*/
+@media (hover: none) {
+  /* ---- 触控目标一律放大到 ≥44px（Apple HIG / Material 建议值）
+         放在 hover:none 里而不是按屏宽，这样平板（iPad 竖屏 768px+）也能命中 ---- */
+  .icon-btn { width: 44px; height: 44px; }
+  .nav__actions { gap: 10px; }
+  .brand { min-height: 44px; }
+  /* 平板（iPad 等）顶栏导航同样是手指在点，也得 ≥44px */
+  .nav__link { min-height: 44px; display: inline-flex; align-items: center; }
+  .to-top { width: 44px; height: 44px; }
+  .filter { min-height: 44px; padding: 11px 16px; font-size: 13.5px; }
+  .social-chip { min-height: 44px; padding: 10px 16px; }
+  .link-more { min-height: 44px; padding: 8px 0; }
+  .platform__cta { min-height: 48px; }
+  .footer__mail-value { min-height: 40px; display: inline-flex; align-items: center; }
+
+  /* 触屏没有 hover，封面上的播放按钮必须常显，否则用户不知道能点 */
+  .video__play { opacity: .72; }
+  .video__play span {
+    width: 40px; height: 40px;
+    background: rgba(0, 0, 0, .42);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, .5);
+    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  }
+  .videos--wall .video__play span { width: 34px; height: 34px; }
+}
+
+/* 触屏点按优化：
+   manipulation 会取消「双击缩放」判定，点击响应更快，也不会误放大页面 */
+.btn, .social-chip, .filter, .icon-btn, .to-top, .link-more,
+.platform__cta, .nav__link, .nav__burger, .brand, .video, .platform,
+.footer__mail-value { touch-action: manipulation; }
+
+/* 按下反馈：触屏没有 hover，必须靠 :active 给即时反馈 */
+.btn:active,
+.social-chip:active,
+.filter:active,
+.icon-btn:active,
+.to-top:active,
+.link-more:active,
+.platform__cta:active,
+.nav__link:active,
+.footer__mail-value:active { opacity: .62; }
+
+.video:active,
+.platform:active,
+.stat:active,
+.prow:active { opacity: .82; }
 
 /* ============================================================================
    降低动效
