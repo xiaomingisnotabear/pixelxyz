@@ -1,7 +1,7 @@
 /* ============================================================================
  *  content.js  —  网站所有可编辑内容
  *  数据来源：B 站 + 抖音 + 小红书（PixelXYZ像素空间）
- *  修改本文件即可更新全站，无需改动 HTML。// TODO 处按需替换。
+ *  ⚠️ 粉丝/获赞 会由 data/stats.json 自动覆盖（GitHub Action 每日同步）
  * ==========================================================================*/
 
 window.SITE = {
@@ -17,22 +17,26 @@ window.SITE = {
 
   /* ---------- 特效开关 ---------- */
   effects: {
-    particles: true,       // 点阵星空背景
-    particleLinks: true,   // 粒子之间连线
-    mouseRepel: true,      // 鼠标靠近时粒子排斥散开
-    customCursor: true,    // 自定义光标（仅桌面端）
-    scanLines: true,       // 卡片扫描发光线条
-    typewriter: true,      // 打字机动画
+    particles: true,
+    particleLinks: true,
+    mouseRepel: true,
+    customCursor: true,
+    scanLines: true,
+    typewriter: true,
   },
 
   /* ---------- 品牌 ---------- */
-  brand: { name: "PixelXYZ", mark: "P" },
+  brand: {
+    name: "PixelXYZ",
+    mark: "P",                      // logo 缺失时的字母回退
+    logo: "assets/avatar.jpg",      // 频道头像（导航 + 页脚）
+  },
 
   nav: [
     { label: "首页", href: "#home" },
     { label: "数据", href: "#stats" },
     { label: "简介", href: "#about" },
-    { label: "作品", href: "#videos" },
+    { label: "作品", href: "#works" },
     { label: "平台", href: "#platforms" },
     { label: "关注", href: "#contact" },
   ],
@@ -47,18 +51,8 @@ window.SITE = {
       "一个兴趣使然创办的数码频道，专注数码产品体验、影像设备与科技内容分享。",
     avatar: "assets/avatar.jpg",
     cta: [
-      {
-        label: "关注 B 站",
-        href: "https://space.bilibili.com/3546840876190266",
-        primary: true,
-        icon: "bilibili",
-      },
-      {
-        label: "关注抖音",
-        href: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3",
-        primary: false,
-        icon: "douyin",
-      },
+      { label: "关注 B 站", href: "https://space.bilibili.com/3546840876190266", primary: true, icon: "bilibili" },
+      { label: "关注抖音", href: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3", primary: false, icon: "douyin" },
     ],
     socials: [
       { name: "哔哩哔哩", url: "https://space.bilibili.com/3546840876190266", icon: "bilibili" },
@@ -68,11 +62,11 @@ window.SITE = {
     highlights: ["数码评测", "影像设备", "开箱体验", "科技资讯", "Vlog 相机", "手机影像"],
   },
 
-  /* ---------- 全平台数据统计 ---------- */
+  /* ---------- 全平台数据 ---------- */
   stats: {
     subtitle: "ALL PLATFORMS",
     title: "全平台数据",
-    note: "数据同步自哔哩哔哩、抖音、小红书公开主页",
+    note: "数据每日自动同步自哔哩哔哩、抖音、小红书公开主页",
     totals: [
       { label: "全平台粉丝", value: 154 },
       { label: "全平台获赞", value: 5284 },
@@ -81,14 +75,14 @@ window.SITE = {
     breakdown: {
       title: "各平台明细",
       items: [
-        { name: "哔哩哔哩", icon: "bilibili", fans: 32, likes: 287 },
-        { name: "抖音", icon: "douyin", fans: 100, likes: 4814 },
-        { name: "小红书", icon: "xiaohongshu", fans: 22, likes: 183 },
+        { key: "bilibili", name: "哔哩哔哩", icon: "bilibili", fans: 32, likes: 287 },
+        { key: "douyin", name: "抖音", icon: "douyin", fans: 100, likes: 4814 },
+        { key: "xiaohongshu", name: "小红书", icon: "xiaohongshu", fans: 22, likes: 183 },
       ],
     },
   },
 
-  /* ---------- 内容方向（进度条） ---------- */
+  /* ---------- 内容方向 ---------- */
   focus: {
     title: "内容方向",
     subtitle: "CONTENT FOCUS",
@@ -101,7 +95,7 @@ window.SITE = {
     ],
   },
 
-  /* ---------- 终端风简介 ---------- */
+  /* ---------- 终端简介 ---------- */
   terminal: {
     subtitle: "WHO AM I",
     title: "频道简介",
@@ -116,21 +110,19 @@ window.SITE = {
       { type: "out", text: "数码评测/  影像设备/  开箱体验/  科技资讯/" },
       { type: "cmd", text: "ls ./platforms" },
       { type: "out", text: "bilibili/  douyin/  xiaohongshu/  qq-group/" },
-      { type: "cmd", text: "echo $CHANNEL" },
-      { type: "out", text: "bili: fans=32   likes=287" },
-      { type: "out", text: "dy:   fans=100  likes=4814" },
-      { type: "out", text: "xhs:  fans=22   likes+saves=183" },
+      { type: "cmd", text: "stat --all" },
+      { type: "out", text: "fans=154  likes=5284  platforms=3" },
     ],
   },
 
-  /* ---------- 关于（资料卡） ---------- */
+  /* ---------- 频道档案 ---------- */
   about: {
     subtitle: "PROFILE",
     title: "频道档案",
     facts: [
       { label: "频道名称", value: "PixelXYZ像素空间" },
       { label: "频道定位", value: "数码 · 影像 · 科技" },
-      { label: "内容形式", value: "评测 / 开箱 / 混剪" },
+      { label: "内容形式", value: "视频 / 图文 / 混剪" },
       { label: "B 站 UID", value: "3546840876190266" },
       { label: "抖音号", value: "49256467732" },
       { label: "小红书号", value: "95546159235" },
@@ -138,76 +130,76 @@ window.SITE = {
     ],
   },
 
-  /* ---------- 作品 ---------- */
-  videos: {
+  /* ---------- 作品（多平台 + 筛选） ---------- */
+  works: {
     subtitle: "LATEST WORKS",
-    title: "最新作品",
+    title: "作品",
     more: { label: "查看全部投稿", url: "https://space.bilibili.com/3546840876190266/video" },
-    items: [
-      { title: "「直抒己见」红米Note17系列拉完了？", bvid: "BV1nN496XE91", date: "8月30日", views: 1342, danmaku: 0, duration: "04:33", cover: "assets/v1.webp" },
-      { title: "谢幕之际，用混剪来回顾15年的库克时代……", bvid: "BV1jUKH6rEfj", date: "7月21日", views: 109, danmaku: 1, duration: "03:11", cover: "assets/v2.webp" },
-      { title: "只要69元就能买Pocket3？小心陷阱!", bvid: "BV1frDmB4EkL", date: "4月12日", views: 3056, danmaku: 0, duration: "00:48", cover: "assets/v3.webp" },
-      { title: "学生党必看!低预算也能买相机!500-4000元相机推荐", bvid: "BV1FdhXzyEAR", date: "2025年8月29日", views: 2767, danmaku: 1, duration: "04:58", cover: "assets/v4.webp" },
-      { title: "可能是1.5K以内最好的vlog相机？大疆Pocket2浅谈", bvid: "BV1ruVXzPEUT", date: "2025年5月10日", views: 5481, danmaku: 34, duration: "07:41", cover: "assets/v5.webp" },
+    filters: [
+      { id: "all", label: "全部" },
+      { id: "video", label: "视频" },
+      { id: "article", label: "图文" },
+      { id: "douyin", label: "抖音" },
     ],
-    videoUrlTemplate: "https://www.bilibili.com/video/{bvid}/",
+    items: [
+      /* ---- 哔哩哔哩 · 视频 ---- */
+      { platform: "bilibili", kind: "video", title: "「直抒己见」红米Note17系列拉完了？", cover: "assets/v1.webp", url: "https://www.bilibili.com/video/BV1nN496XE91/", date: "8月30日", views: 1342, danmaku: 0, duration: "04:33" },
+      { platform: "bilibili", kind: "video", title: "谢幕之际，用混剪来回顾15年的库克时代……", cover: "assets/v2.webp", url: "https://www.bilibili.com/video/BV1jUKH6rEfj/", date: "7月21日", views: 109, danmaku: 1, duration: "03:11" },
+      { platform: "bilibili", kind: "video", title: "只要69元就能买Pocket3？小心陷阱!", cover: "assets/v3.webp", url: "https://www.bilibili.com/video/BV1frDmB4EkL/", date: "4月12日", views: 3056, danmaku: 0, duration: "00:48" },
+      { platform: "bilibili", kind: "video", title: "学生党必看!低预算也能买相机!500-4000元相机推荐", cover: "assets/v4.webp", url: "https://www.bilibili.com/video/BV1FdhXzyEAR/", date: "2025年8月29日", views: 2767, danmaku: 1, duration: "04:58" },
+      { platform: "bilibili", kind: "video", title: "可能是1.5K以内最好的vlog相机？大疆Pocket2浅谈", cover: "assets/v5.webp", url: "https://www.bilibili.com/video/BV1ruVXzPEUT/", date: "2025年5月10日", views: 5481, danmaku: 34, duration: "07:41" },
+
+      /* ---- 哔哩哔哩 · 图文 ---- */
+      { platform: "bilibili", kind: "article", title: "轻舟已过万重山！", cover: "assets/opus1.webp", url: "https://www.bilibili.com/opus/1247955507289784344", comments: 1 },
+      { platform: "bilibili", kind: "article", title: "华为FreeClip2｜好用但我不喜欢", cover: "assets/opus2.webp", url: "https://www.bilibili.com/opus/1244882290631245843", comments: 1 },
+      { platform: "bilibili", kind: "article", title: "分享图片", cover: "assets/opus3.webp", url: "https://www.bilibili.com/opus/1232152557332201523", comments: 3 },
+      { platform: "bilibili", kind: "article", title: "「60个月不卡」", cover: "assets/opus4.webp", url: "https://www.bilibili.com/opus/1225474995581354004", comments: 2 },
+      { platform: "bilibili", kind: "article", title: "图片分享", cover: "assets/opus5.webp", url: "https://www.bilibili.com/opus/1119488083362840580", comments: 6 },
+      { platform: "bilibili", kind: "article", title: "频道设备鸟枪换炮咯", cover: "assets/opus6.webp", url: "https://www.bilibili.com/opus/1116140714709745669", comments: 4 },
+      { platform: "bilibili", kind: "article", title: "今天是世界摄影日，大家节日快乐！", cover: "assets/opus7.webp", url: "https://www.bilibili.com/opus/1102740373787115529", comments: 6 },
+      { platform: "bilibili", kind: "article", title: "人生中第二卷胶片 & 也是玩上中画幅了（忽略瑕疵）", cover: "assets/opus8.webp", url: "https://www.bilibili.com/opus/1073170249769025537", comments: 6 },
+
+      /* ---- 抖音（网页版不提供标题，以封面墙呈现） ---- */
+      { platform: "douyin", kind: "clip", cover: "assets/dy1.png", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3" },
+      { platform: "douyin", kind: "clip", cover: "assets/dy2.png", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3" },
+      { platform: "douyin", kind: "clip", cover: "assets/dy3.png", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3" },
+      { platform: "douyin", kind: "clip", cover: "assets/dy4.png", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3" },
+      { platform: "douyin", kind: "clip", cover: "assets/dy5.png", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3" },
+    ],
   },
 
   /* ---------- 多平台矩阵 ---------- */
   platforms: {
     subtitle: "PLATFORMS",
     title: "多平台矩阵",
-    note: "数据同步自各平台公开主页",
+    note: "数据每日自动同步自各平台公开主页",
     cta: "前往关注",
     items: [
       {
-        name: "哔哩哔哩",
-        handle: "UID 3546840876190266",
-        icon: "bilibili",
-        avatar: "assets/avatar.jpg",
-        url: "https://space.bilibili.com/3546840876190266",
-        stats: [
-          { label: "粉丝", value: 32 },
-          { label: "获赞", value: 287 },
-          { label: "投稿", value: 13 },
-        ],
+        key: "bilibili", name: "哔哩哔哩", handle: "UID 3546840876190266", icon: "bilibili",
+        avatar: "assets/avatar.jpg", url: "https://space.bilibili.com/3546840876190266",
+        stats: [{ key: "fans", label: "粉丝", value: 32 }, { key: "likes", label: "获赞", value: 287 }, { label: "投稿", value: 13 }],
       },
       {
-        name: "抖音",
-        handle: "抖音号 49256467732",
-        icon: "douyin",
+        key: "douyin", name: "抖音", handle: "抖音号 49256467732", icon: "douyin",
         avatar: "assets/dy_avatar.jpg",
         url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3",
-        stats: [
-          { label: "粉丝", value: 100 },
-          { label: "获赞", value: 4814 },
-          { label: "作品", value: 5 },
-        ],
+        stats: [{ key: "fans", label: "粉丝", value: 100 }, { key: "likes", label: "获赞", value: 4814 }, { label: "作品", value: 5 }],
       },
       {
-        name: "小红书",
-        handle: "小红书号 95546159235",
-        icon: "xiaohongshu",
+        key: "xiaohongshu", name: "小红书", handle: "小红书号 95546159235", icon: "xiaohongshu",
         avatar: "assets/xhs_avatar.jpg",
         url: "https://www.xiaohongshu.com/user/profile/6878bfff000000001e03ada7",
-        stats: [
-          { label: "粉丝", value: 22 },
-          { label: "关注", value: 29 },
-          { label: "获赞与收藏", value: 183 },
-        ],
+        stats: [{ key: "fans", label: "粉丝", value: 22 }, { key: "likes", label: "获赞与收藏", value: 183 }, { label: "关注", value: 29 }],
       },
       {
-        name: "QQ 交流群",
-        handle: "群号 1023501725",
-        icon: "qq",
-        copy: "1023501725",
-        copyLabel: "复制群号",
-        stats: [],
+        name: "QQ 交流群", handle: "群号 1023501725", icon: "qq",
+        copy: "1023501725", copyLabel: "复制群号", stats: [],
       },
     ],
   },
 
-  /* ---------- 关注 / 联系 ---------- */
+  /* ---------- 关注 ---------- */
   contact: {
     subtitle: "FOLLOW & CONTACT",
     title: "保持关注",

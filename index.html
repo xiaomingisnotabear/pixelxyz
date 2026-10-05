@@ -55,7 +55,7 @@
   <header class="nav" id="nav">
     <div class="container nav__inner">
       <a class="brand" href="#home">
-        <span class="brand__mark" data-bind="brand.mark">P</span>
+        <img class="brand__avatar" id="brandLogo" src="assets/avatar.jpg" alt="PixelXYZ像素空间" width="28" height="28" />
         <span class="brand__name" data-bind="brand.name">PixelXYZ</span>
       </a>
 
@@ -175,18 +175,20 @@
     </section>
 
     <!-- ================= 作品 ================= -->
-    <section class="section" id="videos">
+    <section class="section" id="works">
       <div class="container">
         <header class="sec-head sec-head--split">
           <div>
-            <p class="sec-head__sub" data-reveal data-bind="videos.subtitle">WORKS</p>
-            <h2 class="sec-head__title" data-reveal data-reveal-delay="1" data-bind="videos.title">最新作品</h2>
+            <p class="sec-head__sub" data-reveal data-bind="works.subtitle">WORKS</p>
+            <h2 class="sec-head__title" data-reveal data-reveal-delay="1" data-bind="works.title">作品</h2>
           </div>
-          <a class="link-more" id="videosMore" href="#" data-reveal data-reveal-delay="2">
-            查看全部投稿 <span class="link-more__arrow">→</span>
+          <a class="link-more" id="worksMore" href="#" data-reveal data-reveal-delay="2">
+            查看全部投稿 <span class="link-more__arrow">&rarr;</span>
           </a>
         </header>
-        <div class="videos" id="videosGrid"><!-- JS --></div>
+        <div class="filters" id="worksFilters" role="tablist" data-reveal><!-- JS --></div>
+        <div class="videos" id="worksGrid"><!-- JS --></div>
+        <p class="works__note" id="worksNote" hidden></p>
       </div>
     </section>
 
@@ -220,7 +222,7 @@
   <footer class="footer">
     <div class="container footer__inner">
       <div class="footer__left">
-        <span class="brand__mark brand__mark--sm" data-bind="brand.mark">P</span>
+        <img class="brand__avatar brand__avatar--sm" id="footerLogo" src="assets/avatar.jpg" alt="" width="22" height="22" />
         <span data-bind="footer.text">©</span>
       </div>
       <p class="footer__slogan" data-bind="footer.slogan">pixel infinity</p>

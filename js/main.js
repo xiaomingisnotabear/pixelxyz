@@ -188,11 +188,11 @@
         '<div class="prow__name">' + (I[it.icon] || I.link) + "<span>" + esc(it.name) + "</span></div>" +
         '<div class="prow__metrics">' +
           '<div class="metric">' +
-            '<div class="metric__top"><span class="metric__label">粉丝</span><b class="metric__val">' + fmtNum(it.fans) + "</b></div>" +
+            '<div class="metric__top"><span class="metric__label">粉丝</span><b class="metric__val">' + fmtFull(it.fans) + "</b></div>" +
             '<div class="metric__track"><span class="metric__fill" data-w="' + pct(it.fans, totFans) + '"></span></div>' +
           "</div>" +
           '<div class="metric">' +
-            '<div class="metric__top"><span class="metric__label">获赞</span><b class="metric__val">' + fmtNum(it.likes) + "</b></div>" +
+            '<div class="metric__top"><span class="metric__label">获赞</span><b class="metric__val">' + fmtFull(it.likes) + "</b></div>" +
             '<div class="metric__track"><span class="metric__fill" data-w="' + pct(it.likes, totLikes) + '"></span></div>' +
           "</div>" +
         "</div>";
@@ -297,40 +297,121 @@
     }
   }
 
-  /* ---------- 作品 ---------- */
-  function fmtNum(n) {
+  /* ---------- 作品（多平台 + 筛选） ---------- */
+  function fmtNum(n) {            /* 紧凑：用于播放量等小字 */
     n = Number(n) || 0;
     if (n >= 10000) return (n / 10000).toFixed(1).replace(/\.0$/, "") + "万";
     return String(n);
   }
-  function renderVideos() {
-    var box = $("#videosGrid");
-    if (!box || !S.videos || !S.videos.items) return;
-    var tpl = S.videos.videoUrlTemplate || "https://www.bilibili.com/video/{bvid}/";
-    var more = $("#videosMore");
-    if (more && S.videos.more) more.href = S.videos.more.url;
+  function fmtFull(n) {           /* 精确：用于统计面板，千分位 */
+    return (Number(n) || 0).toLocaleString("en-US");
+  }
 
-    S.videos.items.forEach(function (v, i) {
-      var a = el("a", "video");
-      a.href = tpl.replace("{bvid}", v.bvid || "");
-      a.target = "_blank"; a.rel = "noopener noreferrer";
-      a.setAttribute("data-reveal", "");
-      a.setAttribute("data-reveal-delay", String(Math.min(i % 3, 2)));
-      a.innerHTML =
-        '<div class="video__media">' +
-          '<img src="' + esc(v.cover || "") + '" alt="' + esc(v.title) + '" loading="lazy" />' +
-          '<div class="video__play"><span>' + I.play + "</span></div>" +
-          (v.duration ? '<span class="video__dur">' + esc(v.duration) + "</span>" : "") +
-        "</div>" +
+  var PLATFORM_LABEL = { bilibili: "哔哩哔哩", douyin: "抖音", xiaohongshu: "小红书" };
+
+  function workCard(w, i) {
+    var wall = w.kind === "clip";
+    var a = el("a", "video");
+    a.href = w.url || "#";
+    a.target = "_blank"; a.rel = "noopener noreferrer";
+    a.setAttribute("data-reveal", "");
+    a.setAttribute("data-reveal-delay", String(Math.min(i % 4, 3)));
+
+    var badge = (w.platform && w.platform !== "bilibili")
+      ? '<span class="work__badge">' + esc(PLATFORM_LABEL[w.platform] || "") + "</span>" : "";
+
+    var meta = "";
+    if (w.kind === "video") {
+      meta = "<span>" + I.eye + fmtNum(w.views) + "</span>" +
+             "<span>" + I.danmaku + fmtNum(w.danmaku) + "</span>" +
+             "<span>" + I.clock + esc(w.date || "") + "</span>";
+    } else if (w.kind === "article") {
+      meta = "<span>" + I.danmaku + "评论 " + fmtNum(w.comments) + "</span><span>图文</span>";
+    }
+
+    var dim = wall ? ' width="300" height="400"' : ' width="640" height="360"';
+    a.innerHTML =
+      '<div class="video__media">' +
+        '<img src="' + esc(w.cover || "") + '" alt="' + esc(w.title || "作品封面") + '" loading="lazy" decoding="async"' + dim + " />" +
+        badge +
+        '<div class="video__play"><span>' + I.play + "</span></div>" +
+        (w.duration ? '<span class="video__dur">' + esc(w.duration) + "</span>" : "") +
+      "</div>" +
+      (wall ? "" :
         '<div class="video__body">' +
-          '<h3 class="video__title">' + esc(v.title) + "</h3>" +
-          '<div class="video__meta">' +
-            "<span>" + I.eye + fmtNum(v.views) + "</span>" +
-            "<span>" + I.danmaku + fmtNum(v.danmaku) + "</span>" +
-            "<span>" + I.clock + esc(v.date || "") + "</span>" +
-          "</div>" +
-        "</div>";
-      box.appendChild(a);
+          '<h3 class="video__title">' + esc(w.title || "") + "</h3>" +
+          '<div class="video__meta">' + meta + "</div>" +
+        "</div>");
+    return a;
+  }
+
+  function filterItems(id) {
+    var items = (S.works && S.works.items) || [];
+    if (id === "all") return items.filter(function (w) { return w.kind !== "clip"; });
+    if (id === "video") return items.filter(function (w) { return w.kind === "video"; });
+    if (id === "article") return items.filter(function (w) { return w.kind === "article"; });
+    if (id === "douyin") return items.filter(function (w) { return w.platform === "douyin"; });
+    return items;
+  }
+
+  function renderWorks(id) {
+    var box = $("#worksGrid");
+    if (!box || !S.works) return;
+    var f = id || "all";
+    var items = filterItems(f);
+    box.className = "videos" + (f === "douyin" ? " videos--wall" : "");
+    box.innerHTML = "";
+    items.forEach(function (w, i) { box.appendChild(workCard(w, i)); });
+
+    var note = $("#worksNote");
+    if (note) {
+      if (f === "douyin") {
+        note.hidden = false;
+        note.textContent = "抖音网页版不提供作品标题，这里以封面墙呈现 · 点击任意封面前往抖音主页";
+      } else { note.hidden = true; note.textContent = ""; }
+    }
+
+    /* 切换后的错峰淡入 */
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () {
+        $all("[data-reveal]", box).forEach(function (n, i) {
+          setTimeout(function () { n.classList.add("is-in"); }, i * 55);
+        });
+      });
+    });
+  }
+
+  function renderFilters() {
+    var box = $("#worksFilters");
+    if (!box || !S.works || !S.works.filters) return;
+    var more = $("#worksMore");
+    if (more && S.works.more) more.href = S.works.more.url;
+
+    S.works.filters.forEach(function (f, i) {
+      var b = el("button", "filter" + (i === 0 ? " is-active" : ""),
+        esc(f.label) + '<span class="filter__count">' + filterItems(f.id).length + "</span>");
+      b.type = "button";
+      b.setAttribute("role", "tab");
+      b.setAttribute("aria-selected", i === 0 ? "true" : "false");
+      b.addEventListener("click", function () {
+        $all(".filter", box).forEach(function (x) {
+          x.classList.remove("is-active"); x.setAttribute("aria-selected", "false");
+        });
+        b.classList.add("is-active"); b.setAttribute("aria-selected", "true");
+        renderWorks(f.id);
+      });
+      box.appendChild(b);
+    });
+  }
+
+  /* ---------- 品牌 logo ---------- */
+  function renderBrand() {
+    var logo = (S.brand && S.brand.logo) || "";
+    $all(".brand__avatar").forEach(function (img) {
+      if (logo) { img.src = logo; return; }
+      var sp = el("span", img.classList.contains("brand__avatar--sm")
+        ? "brand__mark brand__mark--sm" : "brand__mark", esc((S.brand && S.brand.mark) || "P"));
+      img.replaceWith(sp);
     });
   }
 
@@ -374,7 +455,7 @@
         var st = el("div", "platform__stats");
         pf.stats.forEach(function (s) {
           var d = el("div", "platform__stat");
-          d.appendChild(el("span", "platform__stat-num", esc(fmtNum(s.value))));
+          d.appendChild(el("span", "platform__stat-num", esc(fmtFull(s.value))));
           d.appendChild(el("span", "platform__stat-label", esc(s.label)));
           st.appendChild(d);
         });
@@ -534,7 +615,7 @@
   /* ---------- 数字滚动 ---------- */
   function setNum(card, val) {
     var n = card.querySelector(".stat__value");
-    if (n) n.textContent = fmtNum(val);
+    if (n) n.textContent = fmtFull(val);
   }
   function runCounter(card) {
     if (card.getAttribute("data-counted")) return;
@@ -632,6 +713,88 @@
     });
   }
 
+  /* ---------- 实时数据（data/stats.json，由 GitHub Action 每日生成） ---------- */
+  function keyOf(name) {
+    if (!name) return null;
+    if (name.indexOf("哔哩") >= 0) return "bilibili";
+    if (name.indexOf("抖音") >= 0) return "douyin";
+    if (name.indexOf("小红书") >= 0) return "xiaohongshu";
+    return null;
+  }
+
+  function loadLiveStats() {
+    if (!window.fetch) return;
+    fetch("data/stats.json", { cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { if (d && d.platforms) applyLiveStats(d); })
+      .catch(function () { /* 静默回退到 content.js 数值 */ });
+  }
+
+  function applyLiveStats(d) {
+    var P = d.platforms || {};
+
+    /* 各平台明细 */
+    if (S.stats && S.stats.breakdown) {
+      (S.stats.breakdown.items || []).forEach(function (it) {
+        var k = it.key || keyOf(it.name);
+        if (!k || !P[k]) return;
+        if (P[k].fans != null) it.fans = P[k].fans;
+        if (P[k].likes != null) it.likes = P[k].likes;
+      });
+    }
+
+    /* 平台卡片 */
+    ((S.platforms && S.platforms.items) || []).forEach(function (p) {
+      var k = p.key || keyOf(p.name);
+      if (!k || !P[k]) return;
+      (p.stats || []).forEach(function (st) {
+        if (st.key === "fans" && P[k].fans != null) st.value = P[k].fans;
+        if (st.key === "likes" && P[k].likes != null) st.value = P[k].likes;
+      });
+    });
+
+    /* 汇总 */
+    var tf = 0, tl = 0, tp = 0;
+    Object.keys(P).forEach(function (k) {
+      if (P[k].fans != null) { tf += Number(P[k].fans) || 0; tp++; }
+      if (P[k].likes != null) { tl += Number(P[k].likes) || 0; }
+    });
+    if (S.stats && S.stats.totals) {
+      if (tf) S.stats.totals[0].value = tf;
+      if (tl) S.stats.totals[1].value = tl;
+      if (tp) S.stats.totals[2].value = tp;
+    }
+    if (d.updated && S.stats) {
+      S.stats.note = "数据每日自动同步自哔哩哔哩、抖音、小红书公开主页 · 更新于 " + String(d.updated).slice(0, 10);
+    }
+
+    rerenderStats();
+  }
+
+  function rerenderStats() {
+    var box = $("#statsGrid");
+    if (box) {
+      box.innerHTML = "";
+      renderStats();
+      $all(".stat[data-count]", box).forEach(function (n) { n.classList.add("is-in"); runCounter(n); });
+    }
+    var bd = $("#breakdownRows");
+    if (bd) {
+      bd.innerHTML = "";
+      renderBreakdown();
+      $all(".prow", bd).forEach(function (n) { n.classList.add("is-in"); });
+      animateMetrics();
+    }
+    var pg = $("#platformsGrid");
+    if (pg) {
+      pg.innerHTML = "";
+      renderPlatforms();
+      $all(".platform", pg).forEach(function (n) { n.classList.add("is-in"); });
+    }
+    var note = $(".stats__note");
+    if (note && S.stats && S.stats.note) note.textContent = S.stats.note;
+  }
+
   /* ---------- 启动 ---------- */
   function init() {
     bindText();
@@ -643,7 +806,9 @@
     renderFocus();
     renderAbout();
     renderTerminal();
-    renderVideos();
+    renderBrand();
+    renderWorks();
+    renderFilters();
     renderPlatforms();
     renderContact();
     initTheme();
@@ -655,6 +820,7 @@
     initPointer();
     initCursor();
     typeTagline();
+    loadLiveStats();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
