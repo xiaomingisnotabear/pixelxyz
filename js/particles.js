@@ -1,5 +1,12 @@
 /* ============================================================================
-   particles.js — 点阵星空 / 连线 / 鼠标排斥（纯原生 Canvas，无依赖）
+   particles.js — 浮尘粒子层（纯原生 Canvas，无依赖）
+   与 CSS 的「弥散光雾 + 网点图」共同构成背景。
+
+   设计要点：
+     · 只做会呼吸的浮尘，不做星空连线（连线是上一版效果，已彻底移除）
+     · 带景深：越"近"的粒子越大、越亮、飘得越快，鼠标视差也越明显
+     · 鼠标视差（不是硬排斥）：整层随光标缓慢反向偏移，产生空间纵深感
+     · 发光点用离屏精灵贴图绘制，避免每帧新建径向渐变，低端设备也能稳住 60fps
    ==========================================================================*/
 (function () {
   "use strict";
@@ -8,34 +15,37 @@
   if (!cv) return;
 
   var CFG = (window.SITE && window.SITE.effects) || {};
+  var ctx = cv.getContext("2d", { alpha: true });
   var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var canvas = cv.getContext("2d", { alpha: true });
 
   var W = 0, H = 0, DPR = 1;
   var parts = [];
-  var mouse = { x: -9999, y: -9999, active: false };
   var rafId = null, running = false;
+  var sprite = null;
 
-  /* 读取主题色 */
-  function readColors() {
-    var root = getComputedStyle(document.documentElement);
-    var p = (root.getPropertyValue("--particle") || "").trim() ||
-            (root.getPropertyValue("--accent") || "#ffffff").trim();
-    return { a: p, b: p, dark: document.documentElement.getAttribute("data-theme") !== "light" };
+  /* 视差：aim 是目标偏移，par 是缓动后的当前偏移 */
+  var PARALLAX = 26;
+  var aimX = 0, aimY = 0, parX = 0, parY = 0;
+
+  function isDark() {
+    return document.documentElement.getAttribute("data-theme") !== "light";
   }
-  var C = readColors();
 
-  function hexToRgb(hex) {
-    hex = hex.replace("#", "");
-    if (hex.length === 3) hex = hex.split("").map(function (c) { return c + c; }).join("");
-    var n = parseInt(hex, 16);
-    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-  }
-  var RGB_A = hexToRgb(C.a);
-  var RGB_B = hexToRgb(C.b);
-
-  function rgba(rgb, a) {
-    return "rgba(" + rgb[0] + "," + rgb[1] + "," + rgb[2] + "," + a + ")";
+  /* ---------- 离屏发光精灵：只画一次，之后 drawImage 复用 ---------- */
+  function buildSprite() {
+    var S = 64;
+    var off = document.createElement("canvas");
+    off.width = off.height = S;
+    var c = off.getContext("2d");
+    var base = isDark() ? "255,255,255" : "17,17,17";
+    var g = c.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+    g.addColorStop(0, "rgba(" + base + ",1)");
+    g.addColorStop(0.40, "rgba(" + base + ",0.92)");
+    g.addColorStop(0.66, "rgba(" + base + ",0.22)");
+    g.addColorStop(1, "rgba(" + base + ",0)");
+    c.fillStyle = g;
+    c.fillRect(0, 0, S, S);
+    sprite = off;
   }
 
   /* ---------- 尺寸 ---------- */
@@ -47,103 +57,67 @@
     cv.height = Math.floor(H * DPR);
     cv.style.width = W + "px";
     cv.style.height = H + "px";
-    canvas.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
     build();
   }
 
-  function build() {
-    var density = CFG.particles === false ? 0 : Math.min(W * H / 16000, 96);
-    var count = Math.max(28, Math.round(reduce ? density * 0.5 : density));
-    parts = [];
-    for (var i = 0; i < count; i++) {
-      parts.push({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        vx: (Math.random() - 0.5) * 0.28,
-        vy: (Math.random() - 0.5) * 0.28,
-        r: Math.random() * 1.6 + 0.7,
-        hue: Math.random() > 0.5 ? RGB_A : RGB_B,
-        tw: Math.random() * Math.PI * 2,
-      });
-    }
+  /* ---------- 粒子 ---------- */
+  function spawn(y) {
+    /* 景深 z：开三次方偏置，让多数粒子落在"远处"，少数在"近处" */
+    var z = Math.pow(Math.random(), 1.35);
+    return {
+      x: Math.random() * W,
+      y: y == null ? Math.random() * H : y,
+      z: z,
+      r: 0.45 + z * 1.7,
+      vx: (Math.random() - 0.5) * (0.04 + z * 0.14),
+      vy: -(0.05 + z * 0.14) - Math.random() * 0.05,   /* 缓慢上浮，像光柱里的尘埃 */
+      tw: Math.random() * Math.PI * 2,
+      sp: 0.004 + Math.random() * 0.012,
+      a: 0.16 + z * 0.42
+    };
   }
 
-  var LINK_DIST = 132;
-  var REPEL_DIST = 140;
+  function build() {
+    var n = Math.round(W * H / 24000);
+    n = Math.max(24, Math.min(n, 76));
+    if (CFG.particles === false) n = 0;
+    if (reduce) n = Math.round(n * 0.4);
+    parts = [];
+    for (var i = 0; i < n; i++) parts.push(spawn());
+  }
 
+  /* ---------- 主循环 ---------- */
   function frame() {
     rafId = null;
-    canvas.clearRect(0, 0, W, H);
+    ctx.clearRect(0, 0, W, H);
 
-    var i, j, p, q, dx, dy, d2, d;
+    parX += (aimX - parX) * 0.05;
+    parY += (aimY - parY) * 0.05;
+    var usePar = CFG.parallax !== false;
 
-    /* 更新位置 */
-    for (i = 0; i < parts.length; i++) {
-      p = parts[i];
+    for (var i = 0; i < parts.length; i++) {
+      var p = parts[i];
+
       p.x += p.vx;
       p.y += p.vy;
-      p.tw += 0.02;
+      p.tw += p.sp;
 
-      /* 鼠标排斥 */
-      if (CFG.mouseRepel !== false && mouse.active) {
-        dx = p.x - mouse.x;
-        dy = p.y - mouse.y;
-        d2 = dx * dx + dy * dy;
-        if (d2 < REPEL_DIST * REPEL_DIST && d2 > 0.01) {
-          d = Math.sqrt(d2);
-          var f = (1 - d / REPEL_DIST) * 2.4;
-          p.x += (dx / d) * f;
-          p.y += (dy / d) * f;
-        }
-      }
+      /* 飘出顶部就从底部重新来过 */
+      if (p.y < -30) { parts[i] = spawn(H + 30); continue; }
+      if (p.x < -30) p.x = W + 30;
+      else if (p.x > W + 30) p.x = -30;
 
-      /* 边界循环 */
-      if (p.x < -20) p.x = W + 20; else if (p.x > W + 20) p.x = -20;
-      if (p.y < -20) p.y = H + 20; else if (p.y > H + 20) p.y = -20;
+      var breathe = 0.6 + Math.sin(p.tw) * 0.4;
+      var depth = 0.35 + p.z * 0.65;                 /* 越近，视差位移越大 */
+      var dx = p.x + (usePar ? parX * depth : 0);
+      var dy = p.y + (usePar ? parY * depth : 0);
+      var r = p.r * (0.85 + breathe * 0.35);
+
+      ctx.globalAlpha = Math.min(p.a * breathe, 1);
+      ctx.drawImage(sprite, dx - r * 2.6, dy - r * 2.6, r * 5.2, r * 5.2);
     }
-
-    /* 连线 */
-    if (CFG.particleLinks !== false) {
-      for (i = 0; i < parts.length; i++) {
-        p = parts[i];
-        for (j = i + 1; j < parts.length; j++) {
-          q = parts[j];
-          dx = p.x - q.x; dy = p.y - q.y;
-          d2 = dx * dx + dy * dy;
-          if (d2 < LINK_DIST * LINK_DIST) {
-            d = Math.sqrt(d2);
-            var alpha = (1 - d / LINK_DIST) * (C.dark ? 0.22 : 0.16);
-            canvas.strokeStyle = rgba(p.hue, alpha);
-            canvas.lineWidth = 0.7;
-            canvas.beginPath();
-            canvas.moveTo(p.x, p.y);
-            canvas.lineTo(q.x, q.y);
-            canvas.stroke();
-          }
-        }
-      }
-    }
-
-    /* 画点 */
-    for (i = 0; i < parts.length; i++) {
-      p = parts[i];
-      var tw = 0.6 + Math.sin(p.tw) * 0.4;
-      canvas.fillStyle = rgba(p.hue, (C.dark ? 0.75 : 0.5) * tw);
-      canvas.beginPath();
-      canvas.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      canvas.fill();
-
-      /* 靠近鼠标的点加光晕 */
-      if (CFG.mouseRepel !== false && mouse.active) {
-        dx = p.x - mouse.x; dy = p.y - mouse.y;
-        if (dx * dx + dy * dy < 90 * 90) {
-          canvas.fillStyle = rgba(p.hue, 0.12);
-          canvas.beginPath();
-          canvas.arc(p.x, p.y, p.r * 4, 0, Math.PI * 2);
-          canvas.fill();
-        }
-      }
-    }
+    ctx.globalAlpha = 1;
 
     if (running && !reduce) rafId = requestAnimationFrame(frame);
   }
@@ -158,19 +132,22 @@
     if (rafId != null) { cancelAnimationFrame(rafId); rafId = null; }
   }
 
-  /* ---------- 事件 ---------- */
-  var pointerTicking = false;
+  /* ---------- 交互 ---------- */
+  var ticking = false;
   window.addEventListener("mousemove", function (e) {
-    if (pointerTicking) return;
-    pointerTicking = true;
+    if (CFG.parallax === false) return;
+    if (ticking) return;
+    ticking = true;
     requestAnimationFrame(function () {
-      mouse.x = e.clientX; mouse.y = e.clientY; mouse.active = true;
-      pointerTicking = false;
+      /* 反向偏移：鼠标往右，粒子层往左，形成纵深 */
+      aimX = (e.clientX / W - 0.5) * -2 * PARALLAX;
+      aimY = (e.clientY / H - 0.5) * -2 * PARALLAX;
+      ticking = false;
     });
   }, { passive: true });
 
   window.addEventListener("mouseout", function (e) {
-    if (!e.relatedTarget) { mouse.active = false; mouse.x = -9999; mouse.y = -9999; }
+    if (!e.relatedTarget) { aimX = 0; aimY = 0; }
   });
 
   document.addEventListener("visibilitychange", function () {
@@ -183,26 +160,18 @@
     rt = setTimeout(function () { resize(); start(); }, 180);
   });
 
-  /* 主题切换后重读颜色 */
-  var mo = new MutationObserver(function () {
-    C = readColors();
-    RGB_A = hexToRgb(C.a);
-    RGB_B = hexToRgb(C.b);
-    parts.forEach(function (p) { p.hue = Math.random() > 0.5 ? RGB_A : RGB_B; });
-  });
-  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  /* 主题切换后重建精灵（黑白反转） */
+  new MutationObserver(function () { buildSprite(); })
+    .observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
   /* ---------- 启动 ---------- */
+  buildSprite();
   resize();
+
   if (CFG.particles === false) {
-    canvas.clearRect(0, 0, W, H);
+    ctx.clearRect(0, 0, W, H);
   } else {
-    canvas.globalAlpha = 0;
-    var t0 = performance.now();
-    (function fade() {
-      canvas.globalAlpha = Math.min((performance.now() - t0) / 900, 1);
-      if (canvas.globalAlpha < 1) requestAnimationFrame(fade);
-    })();
+    requestAnimationFrame(function () { cv.classList.add("is-ready"); });
     start();
   }
 })();

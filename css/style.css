@@ -1,8 +1,9 @@
 /* ============================================================================
    style.css — PixelXYZ像素空间
    遵循 anti-AI-slop 规范（minimalist-ui / hallmark）：
-   · 无渐变 · 无霓虹 · 无重阴影 · 无胶囊按钮 · 无 emoji
+   · 无霓虹 · 无重阴影 · 无胶囊按钮 · 无 emoji
    · 暖调单色（warm monochrome）· 系统字体 · 细线几何 · 克制留白
+   · 渐变只用于背景的「弥散光雾」一处，界面其余部分保持实色
    ==========================================================================*/
 
 /* ---------- Design Tokens ---------- */
@@ -21,7 +22,10 @@
   --accent: #ffffff;
 
   --dot: rgba(255, 255, 255, 0.075);
-  --particle: #ffffff;
+
+  /* 背景弥散光雾强度（想更明显就调大，想更含蓄就调小） */
+  --haze-1: 16%;
+  --haze-2: 6%;
 
   --radius: 14px;
   --radius-sm: 8px;
@@ -58,7 +62,10 @@
   --accent: #111111;
 
   --dot: rgba(0, 0, 0, 0.075);
-  --particle: #111111;
+
+  /* 浅色底上光雾更容易显脏，强度略低一点 */
+  --haze-1: 12%;
+  --haze-2: 4.5%;
 
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
   --shadow-lift: 0 10px 30px -18px rgba(0, 0, 0, 0.06);
@@ -92,40 +99,78 @@ main, header, footer { position: relative; z-index: 1; }
 /* ============================================================================
    背景层（去掉彩色光晕，仅保留点阵 + 粒子 + 细噪点）
    ==========================================================================*/
-.fx-canvas { position: fixed; inset: 0; z-index: -2; pointer-events: none; display: block; }
+/* 粒子层：画在最前，像镜头前的浮尘 */
+.fx-canvas {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none; display: block;
+  opacity: 0; transition: opacity 1.4s var(--ease-soft);
+}
+.fx-canvas.is-ready { opacity: 1; }
 
-.bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+/* 背景层：弥散光雾 + 网点图 + 细噪点
+   ⓘ 不用 filter: blur 做大面积柔光（非常吃 GPU），
+     柔光全部由 radial-gradient 的透明度衰减天然形成，低端机也不掉帧 */
+.bg { position: fixed; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; }
 
+/* 上下两端各压一道极淡的光晕，让画面有"打光"的方向感 */
+.bg::before {
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(130% 68% at 50% -12%, color-mix(in srgb, var(--text) 6%, transparent), transparent 64%),
+    radial-gradient(110% 58% at 50% 116%, color-mix(in srgb, var(--text) 4%, transparent), transparent 68%);
+}
+
+/* ---------- ① 弥散光雾：几团大面积柔光缓慢游移 ---------- */
+.bg__haze { position: absolute; inset: 0; }
+.bg__haze i {
+  position: absolute; display: block; border-radius: 50%;
+  background: radial-gradient(circle closest-side,
+    color-mix(in srgb, var(--text) var(--haze-1), transparent) 0%,
+    color-mix(in srgb, var(--text) var(--haze-2), transparent) 48%,
+    transparent 100%);
+  animation: haze 44s ease-in-out infinite;
+  will-change: transform;
+}
+.bg__haze i:nth-child(1) { width: 82vmax; height: 82vmax; top: -30vmax; left: -18vmax; }
+.bg__haze i:nth-child(2) { width: 66vmax; height: 66vmax; top: 24vh; right: -22vmax; animation-duration: 58s; animation-delay: -14s; }
+.bg__haze i:nth-child(3) { width: 74vmax; height: 74vmax; bottom: -32vmax; left: 4vmax; animation-duration: 52s; animation-delay: -27s; }
+.bg__haze i:nth-child(4) { width: 42vmax; height: 42vmax; top: 8vh; left: 44vw; opacity: .62; animation-duration: 68s; animation-delay: -40s; }
+
+@keyframes haze {
+  0%   { transform: translate3d(0, 0, 0) scale(1); }
+  25%  { transform: translate3d(4vmax, -3vh, 0) scale(1.13); }
+  50%  { transform: translate3d(-3vmax, 4vh, 0) scale(.92); }
+  75%  { transform: translate3d(4vmax, 2vh, 0) scale(1.07); }
+  100% { transform: translate3d(0, 0, 0) scale(1); }
+}
+
+/* ---------- ② 网点图：粗细两层错位叠加，制造疏密层次 ---------- */
 .bg__dots {
   position: absolute; inset: -2px;
   background-image: radial-gradient(circle, var(--dot) 1px, transparent 1.4px);
-  background-size: 28px 28px;
-  mask-image: radial-gradient(ellipse 90% 75% at 50% 18%, #000 8%, transparent 78%);
-  -webkit-mask-image: radial-gradient(ellipse 90% 75% at 50% 18%, #000 8%, transparent 78%);
-  opacity: .85;
+  background-size: 26px 26px;
+  mask-image: radial-gradient(ellipse 118% 100% at 50% 8%, #000 12%, transparent 86%);
+  -webkit-mask-image: radial-gradient(ellipse 118% 100% at 50% 8%, #000 12%, transparent 86%);
+  opacity: .95;
+}
+/* 粗网点：只在右下方聚成一簇，形成视觉重心 */
+.bg__dots::after {
+  content: ""; position: absolute; inset: 0;
+  background-image: radial-gradient(circle, var(--dot) 1.7px, transparent 2.2px);
+  background-size: 52px 52px;
+  background-position: 13px 13px;
+  mask-image: radial-gradient(ellipse 54% 46% at 72% 64%, #000 0%, transparent 74%);
+  -webkit-mask-image: radial-gradient(ellipse 54% 46% at 72% 64%, #000 0%, transparent 74%);
 }
 
+/* ---------- ③ 细噪点：胶片颗粒感 ---------- */
 .bg__grain {
   position: absolute; inset: 0; opacity: .04; mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
 }
 
-/* ---------- 装饰六边形（无渐变，纯描边） ---------- */
-.hex-deco {
-  position: fixed; z-index: 0; pointer-events: none;
-  background: var(--text-3); opacity: .10;
-  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-  animation: floaty 16s ease-in-out infinite;
-}
-.hex-deco::after {
-  content: ""; position: absolute; inset: 1.5px; background: var(--bg);
-  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
-}
-.hex-deco--1 { width: 124px; height: 143px; top: 18vh; right: 7vw; }
-.hex-deco--2 { width: 86px; height: 99px; top: 64vh; left: 5vw; animation-delay: -6s; opacity: .07; }
-.hex-deco--3 { width: 64px; height: 74px; bottom: 12vh; right: 13vw; animation-delay: -10s; opacity: .06; }
-
-@keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+/* 开关（在 js/content.js 的 effects 里控制） */
+.no-haze .bg__haze { display: none; }
+.no-dots .bg__dots { display: none; }
 
 /* ---------- 极轻聚光 ---------- */
 .spotlight {
@@ -677,7 +722,6 @@ main, header, footer { position: relative; z-index: 1; }
   .videos { grid-template-columns: repeat(2, 1fr); }
   .videos--wall { grid-template-columns: repeat(3, 1fr); }
   .platforms { grid-template-columns: repeat(2, 1fr); }
-  .hex-deco--2, .hex-deco--3 { display: none; }
   .prow { grid-template-columns: 160px 1fr; gap: 22px; }
 }
 
@@ -711,7 +755,6 @@ main, header, footer { position: relative; z-index: 1; }
   .glow-avatar { width: min(210px, 56vw); }
   .hero__scroll { display: none; }
   .to-top { right: 16px; bottom: 16px; }
-  .hex-deco { display: none; }
   .cursor { display: none; }
 }
 

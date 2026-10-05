@@ -513,6 +513,13 @@
     });
   }
 
+  /* ---------- 背景特效开关（对应 js/content.js 的 effects） ---------- */
+  function applyEffects() {
+    var root = document.documentElement;
+    root.classList.toggle("no-haze", FX.haze === false);
+    root.classList.toggle("no-dots", FX.dots === false);
+  }
+
   /* ---------- 主题 / 菜单 ---------- */
   function initTheme() {
     var btn = $("#themeToggle"); if (!btn) return;
@@ -850,6 +857,7 @@
     renderFilters();
     renderPlatforms();
     renderContact();
+    applyEffects();
     initTheme();
     initMenu();
     initScroll();

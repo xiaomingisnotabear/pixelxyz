@@ -17,12 +17,12 @@ window.SITE = {
 
   /* ---------- 特效开关 ---------- */
   effects: {
-    particles: true,
-    particleLinks: true,
-    mouseRepel: true,
+    haze: true,          // 背景弥散光雾（大面积柔光缓慢游移）
+    dots: true,          // 背景网点图
+    particles: true,     // 浮尘粒子（不带连线）
+    parallax: true,      // 鼠标视差：粒子层随光标缓慢反向偏移
     customCursor: true,
-    scanLines: true,
-    typewriter: true,
+    typewriter: true,    // 终端简介打字机
   },
 
   /* ---------- 品牌 ---------- */
