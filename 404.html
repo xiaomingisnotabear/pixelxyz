@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 · 页面走丢了</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; display: grid; place-items: center;
+      font-family: "Inter","Noto Sans SC",-apple-system,BlinkMacSystemFont,"PingFang SC",sans-serif;
+      background: #050507; color: #f5f5f7; text-align: center; padding: 24px;
+      overflow: hidden;
+    }
+    .aur {
+      position: fixed; border-radius: 50%; filter: blur(90px); opacity: .5; pointer-events: none;
+    }
+    .a1 { width: 42vw; height: 42vw; background: radial-gradient(circle,#0a84ff,transparent 68%); top:-10vw; left:-8vw; }
+    .a2 { width: 38vw; height: 38vw; background: radial-gradient(circle,#5e5ce6,transparent 68%); bottom:-12vw; right:-8vw; }
+    .wrap { position: relative; }
+    .code {
+      font-size: clamp(5rem, 22vw, 11rem); font-weight: 900; line-height: 1; letter-spacing: -0.05em;
+      background: linear-gradient(120deg,#0a84ff,#5e5ce6,#ff375f);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    p { color: #a1a1a6; font-size: 1.05rem; margin: 10px 0 30px; }
+    a {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 28px; border-radius: 999px; text-decoration: none; font-weight: 600;
+      color: #fff; background: linear-gradient(135deg,#0a84ff,#5e5ce6);
+      box-shadow: 0 14px 34px -14px #0a84ff; transition: transform .25s;
+    }
+    a:hover { transform: translateY(-3px); }
+  </style>
+</head>
+<body>
+  <div class="aur a1"></div>
+  <div class="aur a2"></div>
+  <div class="wrap">
+    <div class="code">404</div>
+    <p>抱歉，你访问的页面不存在或已被移动。</p>
+    <a href="/">← 返回首页</a>
+  </div>
+</body>
+</html>
