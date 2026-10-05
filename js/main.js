@@ -6,7 +6,9 @@
   "use strict";
 
   var S = window.SITE || {};
+  var FX = S.effects || {};
   var reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var noType = reduceMotion || FX.typewriter === false;
 
   /* ---------- 工具 ---------- */
   function $(s, r) { return (r || document).querySelector(s); }
@@ -21,6 +23,7 @@
     return String(s == null ? "" : s)
       .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
+  function easeOutCubic(p) { return 1 - Math.pow(1 - p, 3); }
 
   /* ---------- 图标 ---------- */
   var I = {
@@ -37,11 +40,13 @@
   if (S.meta) {
     if (S.meta.accent) document.documentElement.style.setProperty("--accent", S.meta.accent);
     if (S.meta.accent2) document.documentElement.style.setProperty("--accent-2", S.meta.accent2);
+    if (S.meta.accent3) document.documentElement.style.setProperty("--accent-3", S.meta.accent3);
   }
 
   /* ---------- 绑定文本 ---------- */
   function bindText() {
     $all("[data-bind]").forEach(function (node) {
+      if (node.id === "typeTagline") return; // 交给打字机处理
       var p = node.getAttribute("data-bind").split("."), v = S;
       for (var i = 0; i < p.length && v != null; i++) v = v[p[i]];
       if (v != null) node.textContent = v;
@@ -65,13 +70,11 @@
     });
   }
 
-  /* ---------- Hero ---------- */
   function renderHero() {
     var cta = $("#heroCta");
     if (cta && S.hero && S.hero.cta) {
       S.hero.cta.forEach(function (b) {
-        var a = el("a", "btn " + (b.primary ? "btn--primary" : "btn--ghost"),
-          esc(b.label) + (I[b.icon] || ""));
+        var a = el("a", "btn " + (b.primary ? "btn--primary" : "btn--ghost"), esc(b.label) + (I[b.icon] || ""));
         a.href = b.href || "#";
         if (/^https?:/.test(a.href)) { a.target = "_blank"; a.rel = "noopener noreferrer"; }
         cta.appendChild(a);
@@ -87,26 +90,23 @@
     }
   }
 
-  /* ---------- 跑马灯 ---------- */
   function renderMarquee() {
     var track = $(".marquee__track");
     if (!track || !S.hero || !S.hero.highlights) return;
     var items = S.hero.highlights.slice();
-    // 复制一份用于无缝循环
-    var html = items.concat(items).map(function (t) {
+    track.innerHTML = items.concat(items).map(function (t) {
       return '<span class="marquee__item">' + esc(t) + "</span>";
     }).join("");
-    track.innerHTML = html;
   }
 
-  /* ---------- 数据 ---------- */
+  /* ---------- 数据卡片 ---------- */
   function renderStats() {
     var box = $("#statsGrid");
     if (!box || !S.stats || !S.stats.items) return;
     S.stats.items.forEach(function (s, i) {
       var card = el("div", "stat");
       card.setAttribute("data-reveal", "");
-      card.setAttribute("data-reveal-delay", String(Math.min(i, 5)));
+      card.setAttribute("data-reveal-delay", String(Math.min(i, 4)));
       card.setAttribute("data-count", String(s.value || 0));
       card.innerHTML =
         '<div class="stat__num"><span class="stat__value">0</span>' +
@@ -117,12 +117,114 @@
     });
   }
 
-  /* ---------- 关于 ---------- */
-  function renderAbout() {
-    var t = $("#aboutText");
-    if (t && S.about && S.about.paragraphs) {
-      S.about.paragraphs.forEach(function (p) { t.appendChild(el("p", null, esc(p))); });
+  /* ---------- 进度条面板 ---------- */
+  function renderFocus() {
+    var box = $("#focusBars");
+    if (!box || !S.focus || !S.focus.items) return;
+    S.focus.items.forEach(function (f) {
+      var row = el("div", "bar");
+      row.setAttribute("data-value", String(f.value || 0));
+      row.setAttribute("data-reveal", "");
+      row.innerHTML =
+        '<div class="bar__top">' +
+          '<span class="bar__label">' + esc(f.label) + "</span>" +
+          '<span class="bar__val">0%</span>' +
+        "</div>" +
+        '<div class="bar__track"><span class="bar__fill"></span></div>';
+      box.appendChild(row);
+    });
+  }
+
+  function animateBars() {
+    var rows = $all("#focusBars .bar");
+    if (!rows.length) return;
+    rows.forEach(function (row, i) {
+      if (row.getAttribute("data-done")) return;
+      row.setAttribute("data-done", "1");
+      var val = Number(row.getAttribute("data-value")) || 0;
+      var fill = row.querySelector(".bar__fill");
+      var out = row.querySelector(".bar__val");
+      var delay = i * 130;
+
+      if (reduceMotion) { fill.style.width = val + "%"; out.textContent = val + "%"; return; }
+      fill.style.transitionDelay = delay + "ms";
+
+      setTimeout(function () {
+        fill.style.width = val + "%";
+        var t0 = null, dur = 1450;
+        requestAnimationFrame(function step(ts) {
+          if (t0 === null) t0 = ts;
+          var p = Math.min((ts - t0) / dur, 1);
+          out.textContent = Math.round(val * easeOutCubic(p)) + "%";
+          if (p < 1) requestAnimationFrame(step);
+        });
+      }, delay);
+    });
+  }
+
+  /* ---------- 终端打字机 ---------- */
+  function renderTerminal() {
+    var body = $("#terminalBody");
+    if (!body || !S.terminal || !S.terminal.lines) return;
+    body.innerHTML = "";
+    var caret = el("span", "tcaret");
+    var lines = S.terminal.lines;
+    var started = false;
+
+    function start() {
+      if (started) return; started = true;
+
+      /* 无动画模式：一次性渲染 */
+      if (noType) {
+        lines.forEach(function (l) {
+          body.appendChild(el("span", "tline tline--" + (l.type === "cmd" ? "cmd" : "out"), esc(l.text)));
+        });
+        body.appendChild(caret);
+        return;
+      }
+
+      var li = 0;
+      function nextLine() {
+        if (li >= lines.length) { body.appendChild(caret); return; }
+        var l = lines[li++];
+        var isCmd = l.type === "cmd";
+        var node = el("span", "tline tline--" + (isCmd ? "cmd" : "out"));
+        body.appendChild(node);
+
+        if (!isCmd) {
+          /* 输出行：直接出现（像真实终端） */
+          node.textContent = l.text;
+          setTimeout(nextLine, 190);
+          return;
+        }
+
+        /* 命令：逐字打印 */
+        var text = l.text, ci = 0;
+        node.appendChild(caret);
+        (function type() {
+          if (ci <= text.length) {
+            node.textContent = text.slice(0, ci) + "\u00A0";
+            node.appendChild(caret);
+            ci++;
+            setTimeout(type, 46);
+          } else {
+            node.textContent = text;
+            setTimeout(nextLine, 200);
+          }
+        })();
+      }
+      setTimeout(nextLine, 260);
     }
+
+    if (!("IntersectionObserver" in window)) { start(); return; }
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { io.disconnect(); start(); } });
+    }, { threshold: 0.25 });
+    io.observe($("#terminal"));
+  }
+
+  /* ---------- 档案 ---------- */
+  function renderAbout() {
     var f = $("#aboutFacts");
     if (f && S.about && S.about.facts) {
       S.about.facts.forEach(function (x) {
@@ -135,18 +237,22 @@
   }
 
   /* ---------- 作品 ---------- */
+  function fmtNum(n) {
+    n = Number(n) || 0;
+    if (n >= 10000) return (n / 10000).toFixed(1).replace(/\.0$/, "") + "万";
+    return String(n);
+  }
   function renderVideos() {
     var box = $("#videosGrid");
     if (!box || !S.videos || !S.videos.items) return;
     var tpl = S.videos.videoUrlTemplate || "https://www.bilibili.com/video/{bvid}/";
-
     var more = $("#videosMore");
-    if (more && S.videos.more) { more.href = S.videos.more.url; }
+    if (more && S.videos.more) more.href = S.videos.more.url;
 
     S.videos.items.forEach(function (v, i) {
-      var url = tpl.replace("{bvid}", v.bvid || "");
       var a = el("a", "video");
-      a.href = url; a.target = "_blank"; a.rel = "noopener noreferrer";
+      a.href = tpl.replace("{bvid}", v.bvid || "");
+      a.target = "_blank"; a.rel = "noopener noreferrer";
       a.setAttribute("data-reveal", "");
       a.setAttribute("data-reveal-delay", String(Math.min(i % 3, 2)));
       a.innerHTML =
@@ -158,35 +264,27 @@
         '<div class="video__body">' +
           '<h3 class="video__title">' + esc(v.title) + "</h3>" +
           '<div class="video__meta">' +
-            '<span>' + I.eye + fmtNum(v.views) + "</span>" +
-            '<span>' + I.danmaku + fmtNum(v.danmaku) + "</span>" +
-            '<span>' + I.clock + esc(v.date || "") + "</span>" +
+            "<span>" + I.eye + fmtNum(v.views) + "</span>" +
+            "<span>" + I.danmaku + fmtNum(v.danmaku) + "</span>" +
+            "<span>" + I.clock + esc(v.date || "") + "</span>" +
           "</div>" +
         "</div>";
       box.appendChild(a);
     });
   }
 
-  function fmtNum(n) {
-    n = Number(n) || 0;
-    if (n >= 10000) return (n / 10000).toFixed(1).replace(/\.0$/, "") + "万";
-    return String(n);
-  }
-
-  /* ---------- 关注 ---------- */
   function renderContact() {
     var box = $("#contactActions");
     if (!box || !S.contact) return;
     (S.contact.socials || []).forEach(function (s, i) {
-      var a = el("a", "btn " + (i === 0 ? "btn--primary" : "btn--ghost"),
-        (I[s.icon] || I.link) + esc(s.name));
+      var a = el("a", "btn " + (i === 0 ? "btn--primary" : "btn--ghost"), (I[s.icon] || I.link) + esc(s.name));
       a.href = s.url || "#";
       if (/^https?:/.test(a.href)) { a.target = "_blank"; a.rel = "noopener noreferrer"; }
       box.appendChild(a);
     });
   }
 
-  /* ---------- 主题 ---------- */
+  /* ---------- 主题 / 菜单 ---------- */
   function initTheme() {
     var btn = $("#themeToggle"); if (!btn) return;
     btn.addEventListener("click", function () {
@@ -195,8 +293,6 @@
       try { localStorage.setItem("theme", cur); } catch (e) {}
     });
   }
-
-  /* ---------- 菜单 ---------- */
   function initMenu() {
     var nav = $("#nav"), burger = $("#navBurger"); if (!nav || !burger) return;
     burger.addEventListener("click", function () {
@@ -226,7 +322,6 @@
       sections.forEach(function (s) { if (s.offsetTop - 140 <= y) cur = s.id; });
       links.forEach(function (a) { a.classList.toggle("is-active", a.getAttribute("href") === "#" + cur); });
 
-      // 视差
       if (!reduceMotion) {
         $all("[data-parallax]").forEach(function (n) {
           var sp = parseFloat(n.getAttribute("data-parallax")) || 0.1;
@@ -239,16 +334,16 @@
       if (!ticking) { ticking = true; requestAnimationFrame(update); }
     }, { passive: true });
     update();
-
     if (toTop) toTop.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
   }
 
-  /* ---------- 揭示动画 ---------- */
+  /* ---------- 揭示 ---------- */
   var revealObserver = null;
   function initReveal() {
     var items = $all("[data-reveal]");
     if (reduceMotion || !("IntersectionObserver" in window)) {
       items.forEach(function (n) { n.classList.add("is-in"); });
+      animateBars();
       return;
     }
     if (!revealObserver) {
@@ -259,9 +354,22 @@
       }, { threshold: 0.12, rootMargin: "0px 0px -6% 0px" });
     }
     items.forEach(function (n) { revealObserver.observe(n); });
+
+    /* 进度条：进入视口时填充 */
+    var bars = $("#focusBars");
+    if (bars) {
+      var bio = new IntersectionObserver(function (es) {
+        es.forEach(function (e) { if (e.isIntersecting) { bio.disconnect(); animateBars(); } });
+      }, { threshold: 0.3 });
+      bio.observe(bars);
+    }
   }
 
   /* ---------- 数字滚动 ---------- */
+  function setNum(card, val) {
+    var n = card.querySelector(".stat__value");
+    if (n) n.textContent = fmtNum(val);
+  }
   function initCounters() {
     var cards = $all(".stat[data-count]");
     if (!cards.length) return;
@@ -275,21 +383,31 @@
         var card = en.target, target = Number(card.getAttribute("data-count"));
         io.unobserve(card);
         var start = null, dur = 1500;
-        function step(ts) {
+        requestAnimationFrame(function step(ts) {
           if (!start) start = ts;
           var p = Math.min((ts - start) / dur, 1);
-          var eased = 1 - Math.pow(1 - p, 3);
-          setNum(card, Math.round(target * eased));
+          setNum(card, Math.round(target * easeOutCubic(p)));
           if (p < 1) requestAnimationFrame(step);
-        }
-        requestAnimationFrame(step);
+        });
       });
     }, { threshold: 0.4 });
     cards.forEach(function (c) { io.observe(c); });
   }
-  function setNum(card, val) {
-    var n = card.querySelector(".stat__value");
-    if (n) n.textContent = fmtNum(val);
+
+  /* ---------- 首屏标语打字机 ---------- */
+  function typeTagline() {
+    var el = $("#typeTagline"); if (!el) return;
+    var full = (S.hero && S.hero.tagline) || el.textContent || "";
+    if (noType) { el.textContent = full; return; }
+    el.textContent = "";                       // 立即清空，避免闪现全文
+    setTimeout(function () {
+      var i = 0;
+      (function step() {
+        el.textContent = full.slice(0, i);
+        i++;
+        if (i <= full.length) setTimeout(step, 30);
+      })();
+    }, 760);
   }
 
   /* ---------- 鼠标聚光 + 卡片高光 ---------- */
@@ -310,6 +428,40 @@
     }, { passive: true });
   }
 
+  /* ---------- 自定义终端光标 ---------- */
+  function initCursor() {
+    if (FX.customCursor === false || reduceMotion) return;
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    var cur = $("#cursor"); if (!cur) return;
+
+    document.body.classList.add("has-cursor");
+    cur.classList.add("is-on");
+
+    var mx = window.innerWidth / 2, my = window.innerHeight / 2, rx = mx, ry = my, raf = null;
+    window.addEventListener("mousemove", function (e) { mx = e.clientX; my = e.clientY; }, { passive: true });
+
+    function loop() {
+      rx += (mx - rx) * 0.2; ry += (my - ry) * 0.2;
+      cur.style.transform = "translate(" + rx.toFixed(2) + "px," + ry.toFixed(2) + "px)";
+      raf = requestAnimationFrame(loop);
+    }
+    loop();
+
+    var hot = "a,button,.video,.stat,.social-chip,input,textarea,.link-more";
+    document.addEventListener("mouseover", function (e) {
+      var t = e.target;
+      cur.classList.toggle("is-link", !!(t && t.closest && t.closest(hot)));
+    }, { passive: true });
+    window.addEventListener("mousedown", function () { cur.classList.add("is-down"); });
+    window.addEventListener("mouseup", function () { cur.classList.remove("is-down"); });
+    document.addEventListener("mouseleave", function () { cur.style.opacity = "0"; });
+    document.addEventListener("mouseenter", function () { cur.style.opacity = "1"; });
+    document.addEventListener("visibilitychange", function () {
+      if (document.hidden) { if (raf) { cancelAnimationFrame(raf); raf = null; } }
+      else if (!raf) { loop(); }
+    });
+  }
+
   /* ---------- 启动 ---------- */
   function init() {
     bindText();
@@ -317,7 +469,9 @@
     renderHero();
     renderMarquee();
     renderStats();
+    renderFocus();
     renderAbout();
+    renderTerminal();
     renderVideos();
     renderContact();
     initTheme();
@@ -326,6 +480,8 @@
     initReveal();
     initCounters();
     initPointer();
+    initCursor();
+    typeTagline();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

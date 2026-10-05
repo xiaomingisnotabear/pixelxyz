@@ -1,5 +1,5 @@
 /* ============================================================================
- *  content.js  —  网站所有可编辑内容（数据来源：B 站主页 PixelXYZ像素空间）
+ *  content.js  —  网站所有可编辑内容（数据来源：B 站 PixelXYZ像素空间）
  *  修改本文件即可更新全站，无需改动 HTML。
  *  标注 // TODO 的地方可按需替换。
  * ==========================================================================*/
@@ -14,7 +14,18 @@ window.SITE = {
     favicon: "assets/favicon.svg",
     accent: "#0a84ff",   // Apple 蓝
     accent2: "#5e5ce6",  // Apple 靛蓝
+    accent3: "#ff375f",  // 品红点缀
     theme: "dark",       // 默认主题：dark / light
+  },
+
+  /* ---------- 特效开关 ---------- */
+  effects: {
+    particles: true,       // 点阵星空背景
+    particleLinks: true,   // 粒子之间连线（赛博风）
+    mouseRepel: true,      // 鼠标靠近时粒子排斥散开
+    customCursor: true,    // 自定义终端风格光标（仅桌面端）
+    scanLines: true,       // 卡片底部扫描发光线条
+    typewriter: true,      // 打字机动画
   },
 
   /* ---------- 品牌 ---------- */
@@ -22,8 +33,8 @@ window.SITE = {
 
   nav: [
     { label: "首页", href: "#home" },
-    { label: "关于", href: "#about" },
     { label: "数据", href: "#stats" },
+    { label: "简介", href: "#about" },
     { label: "作品", href: "#videos" },
     { label: "关注", href: "#contact" },
   ],
@@ -71,20 +82,48 @@ window.SITE = {
     note: "数据同步自哔哩哔哩 · 持续更新中",
   },
 
-  /* ---------- 关于 ---------- */
-  about: {
-    subtitle: "ABOUT THE CHANNEL",
-    title: "关于频道",
-    paragraphs: [
-      "PixelXYZ像素空间，是一个兴趣使然创办的数码频道。",
-      "「pixel infinity, advance courageously / 像素无限，一往无前」是我们始终坚持的信念——用像素记录科技，用内容传递热爱。从数码产品评测到影像设备分享，我们乐于把真实的体验与思考带给你。",
-      "无论你是数码爱好者，还是正在挑选第一台相机的学生党，这里都希望成为你值得信赖的参考。",
+  /* ---------- 内容方向（进度条） ---------- */
+  focus: {
+    title: "内容方向",
+    subtitle: "CONTENT FOCUS",
+    note: "占比为内容侧重示意，可在 js/content.js 中调整", // TODO
+    items: [
+      { label: "数码产品评测", value: 85 },
+      { label: "影像设备 / 相机", value: 78 },
+      { label: "科技资讯与观点", value: 62 },
+      { label: "剪辑 / 混剪", value: 55 },
     ],
+  },
+
+  /* ---------- 终端风简介 ---------- */
+  terminal: {
+    subtitle: "WHO AM I",
+    title: "频道简介",
+    windowTitle: "pixelxyz@bilibili: ~/space",
+    lines: [
+      { type: "cmd", text: "whoami" },
+      { type: "out", text: "PixelXYZ像素空间 — 一个兴趣使然创办的数码频道" },
+      { type: "cmd", text: "cat motto.txt" },
+      { type: "out", text: '"pixel infinity, advance courageously"' },
+      { type: "out", text: '"像素无限，一往无前"' },
+      { type: "cmd", text: "ls ./topics" },
+      { type: "out", text: "数码评测/  影像设备/  开箱体验/  科技资讯/" },
+      { type: "cmd", text: "echo $CHANNEL" },
+      { type: "out", text: "fans=32  likes=287  uploads=13" },
+    ],
+  },
+
+  /* ---------- 关于（资料卡） ---------- */
+  about: {
+    subtitle: "PROFILE",
+    title: "频道档案",
     facts: [
+      { label: "频道名称", value: "PixelXYZ像素空间" },
       { label: "频道定位", value: "数码 · 影像 · 科技" },
       { label: "内容形式", value: "评测 / 开箱 / 混剪" },
       { label: "B 站 UID", value: "3546840876190266" },
-      { label: "等级", value: "LV3" },
+      { label: "账号等级", value: "LV3" },
+      { label: "创立初衷", value: "兴趣使然" },
     ],
   },
 

@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+SC:wght@400;500;700;900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Noto+Sans+SC:wght@400;500;700;900&display=swap"
     rel="stylesheet" />
 
   <link rel="stylesheet" href="css/style.css" />
@@ -20,7 +20,7 @@
   <script>
     (function () {
       try {
-        var t = localStorage.getItem("theme") || (window.SITE && window.SITE.meta && window.SITE.meta.theme) || "dark";
+        var t = localStorage.getItem("theme") || "dark";
         document.documentElement.setAttribute("data-theme", t);
       } catch (e) {}
     })();
@@ -28,17 +28,31 @@
 </head>
 <body>
 
-  <!-- 背景层：极光 + 网格 + 噪点 -->
+  <!-- ============ 背景：粒子画布 + 极光 + 点阵网格 + 噪点 ============ -->
+  <canvas class="fx-canvas" id="fx" aria-hidden="true"></canvas>
+
   <div class="bg" aria-hidden="true">
     <div class="bg__aurora bg__aurora--1"></div>
     <div class="bg__aurora bg__aurora--2"></div>
     <div class="bg__aurora bg__aurora--3"></div>
-    <div class="bg__grid"></div>
+    <div class="bg__dots" id="bgDots"></div>
     <div class="bg__grain"></div>
+    <div class="bg__scan"></div>
   </div>
+
+  <!-- 装饰六边形 -->
+  <div class="hex-deco hex-deco--1" aria-hidden="true"></div>
+  <div class="hex-deco hex-deco--2" aria-hidden="true"></div>
+  <div class="hex-deco hex-deco--3" aria-hidden="true"></div>
 
   <!-- 鼠标聚光 -->
   <div class="spotlight" id="spotlight" aria-hidden="true"></div>
+
+  <!-- 自定义终端光标 -->
+  <div class="cursor" id="cursor" aria-hidden="true">
+    <span class="cursor__ring"></span>
+    <span class="cursor__dot"></span>
+  </div>
 
   <!-- 滚动进度 -->
   <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
@@ -69,31 +83,32 @@
     <!-- ================= Hero ================= -->
     <section class="hero" id="home">
       <div class="container hero__inner">
-        <div class="hero__visual" data-parallax="0.08">
-          <div class="glow-avatar">
-            <div class="glow-avatar__ring"></div>
-            <img id="heroAvatar" src="assets/avatar.jpg" alt="PixelXYZ像素空间" width="220" height="220" />
-          </div>
-        </div>
-
         <div class="hero__text">
-          <p class="badge" data-reveal>
+          <p class="badge anim-in" style="--d:0ms">
             <span class="badge__dot"></span>
             <span data-bind="hero.badge">数码频道</span>
           </p>
 
-          <h1 class="hero__name" data-reveal data-reveal-delay="1" data-bind="hero.name">PixelXYZ 像素空间</h1>
+          <h1 class="hero__name anim-in" style="--d:120ms" data-bind="hero.name">PixelXYZ 像素空间</h1>
 
-          <p class="hero__slogan" data-reveal data-reveal-delay="2">
+          <p class="hero__slogan anim-in" style="--d:240ms">
             <span class="grad" data-bind="hero.slogan">像素无限，一往无前</span>
           </p>
-          <p class="hero__slogan-en" data-reveal data-reveal-delay="2" data-bind="hero.sloganEn">Pixel Infinity</p>
+          <p class="hero__slogan-en anim-in" style="--d:320ms" data-bind="hero.sloganEn">Pixel Infinity</p>
 
-          <p class="hero__tagline" data-reveal data-reveal-delay="3" data-bind="hero.tagline">...</p>
+          <p class="hero__tagline anim-in" style="--d:420ms">
+            <span id="typeTagline" data-bind="hero.tagline"></span><span class="type-caret" id="typeCaret"></span>
+          </p>
 
-          <div class="hero__cta" id="heroCta" data-reveal data-reveal-delay="4"><!-- JS --></div>
+          <div class="hero__cta anim-in" id="heroCta" style="--d:540ms"><!-- JS --></div>
+          <div class="hero__socials anim-in" id="heroSocials" style="--d:660ms"><!-- JS --></div>
+        </div>
 
-          <div class="hero__socials" id="heroSocials" data-reveal data-reveal-delay="5"><!-- JS --></div>
+        <div class="hero__visual anim-in" style="--d:200ms" data-parallax="0.06">
+          <div class="glow-avatar">
+            <div class="glow-avatar__ring"></div>
+            <img id="heroAvatar" src="assets/avatar.jpg" alt="PixelXYZ像素空间" width="220" height="220" />
+          </div>
         </div>
       </div>
 
@@ -104,33 +119,58 @@
     </section>
 
     <!-- ================= 跑马灯 ================= -->
-    <div class="marquee" id="marquee" aria-hidden="true">
-      <div class="marquee__track"><!-- JS --></div>
-    </div>
+    <div class="marquee" aria-hidden="true"><div class="marquee__track"><!-- JS --></div></div>
 
-    <!-- ================= 数据 ================= -->
+    <!-- ================= 数据 + 内容方向 ================= -->
     <section class="section" id="stats">
       <div class="container">
         <header class="sec-head">
           <p class="sec-head__sub" data-reveal data-bind="stats.subtitle">DATA</p>
           <h2 class="sec-head__title" data-reveal data-reveal-delay="1" data-bind="stats.title">频道数据</h2>
         </header>
+
         <div class="stats" id="statsGrid"><!-- JS --></div>
+
+        <div class="divider" data-reveal><span class="divider__glow"></span></div>
+
+        <div class="focus">
+          <div class="focus__head" data-reveal>
+            <h3 class="focus__title" data-bind="focus.title">内容方向</h3>
+            <span class="focus__sub" data-bind="focus.subtitle">CONTENT FOCUS</span>
+          </div>
+          <div class="bars" id="focusBars"><!-- JS --></div>
+        </div>
+
         <p class="stats__note" data-reveal data-bind="stats.note"></p>
       </div>
     </section>
 
-    <!-- ================= 关于 ================= -->
+    <!-- ================= 终端简介 + 档案 ================= -->
     <section class="section" id="about">
       <div class="container">
         <header class="sec-head">
-          <p class="sec-head__sub" data-reveal data-bind="about.subtitle">ABOUT</p>
-          <h2 class="sec-head__title" data-reveal data-reveal-delay="1" data-bind="about.title">关于频道</h2>
+          <p class="sec-head__sub" data-reveal data-bind="terminal.subtitle">WHO AM I</p>
+          <h2 class="sec-head__title" data-reveal data-reveal-delay="1" data-bind="terminal.title">频道简介</h2>
         </header>
 
         <div class="about">
-          <div class="about__text" id="aboutText" data-reveal><!-- JS --></div>
-          <ul class="about__facts" id="aboutFacts" data-reveal data-reveal-delay="2"><!-- JS --></ul>
+          <!-- 终端窗口 -->
+          <div class="terminal" id="terminal" data-reveal>
+            <div class="terminal__bar">
+              <span class="terminal__dot terminal__dot--r"></span>
+              <span class="terminal__dot terminal__dot--y"></span>
+              <span class="terminal__dot terminal__dot--g"></span>
+              <span class="terminal__title" data-bind="terminal.windowTitle">~/space</span>
+            </div>
+            <div class="terminal__body" id="terminalBody"></div>
+          </div>
+
+          <!-- 档案卡 -->
+          <div class="profile" data-reveal data-reveal-delay="1">
+            <p class="sec-head__sub" data-bind="about.subtitle">PROFILE</p>
+            <h3 class="profile__title" data-bind="about.title">频道档案</h3>
+            <ul class="about__facts" id="aboutFacts"><!-- JS --></ul>
+          </div>
         </div>
       </div>
     </section>
@@ -179,6 +219,7 @@
   </button>
 
   <script src="js/content.js"></script>
+  <script src="js/particles.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
