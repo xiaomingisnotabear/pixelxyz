@@ -34,6 +34,7 @@
     danmaku: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-1.2 4.3 8.5 8.5 0 0 1-7.3 4.2 8.4 8.4 0 0 1-3.9-1L3 21l1.9-5.6a8.4 8.4 0 0 1-1-3.9A8.5 8.5 0 0 1 8 4.2 8.4 8.4 0 0 1 12.5 3h.5a8.5 8.5 0 0 1 8 8z"/></svg>',
     clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
     link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>',
+    xiaohongshu: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 5.06C10.3 4.4 9.34 4 8.28 4H4.6C3.72 4 3 4.72 3 5.6v11.9c0 .88.72 1.6 1.6 1.6h3.68c1.06 0 2.02.4 2.72 1.06V5.06Zm2 15.1c.7-.66 1.66-1.06 2.72-1.06h3.68c.88 0 1.6-.72 1.6-1.6V5.6c0-.88-.72-1.6-1.6-1.6h-3.68c-1.06 0-2.02.4-2.72 1.06v15.1Z"/></svg>',
     douyin: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>',
     qq: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.395 15.035a40 40 0 0 0-.803-2.264l-1.079-2.695c.001-.032.014-.562.014-.836C19.527 4.632 17.122 1 12 1S4.473 4.632 4.473 9.24c0 .274.013.804.014.836l-1.079 2.695a39 39 0 0 0-.803 2.264c-1.021 3.283-.69 4.643-.438 4.673.54.065 2.103-2.472 2.103-2.472 0 1.469.756 3.387 3.199 4.741-.09.38-.4 1.259-.504 1.865-.011.066-.03.31-.034.4 0 .157.09.31.31.31.32 0 1.32-.42 2.36-.84.34.06.68.09 1.03.09.35 0 .69-.03 1.03-.09 1.04.42 2.04.84 2.36.84.22 0 .31-.153.31-.31-.004-.09-.023-.334-.034-.4-.104-.606-.414-1.485-.504-1.865 2.443-1.354 3.199-3.272 3.199-4.741 0 0 1.563 2.537 2.103 2.472.252-.03.583-1.39-.438-4.673z"/></svg>',
     copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M6 15H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v1"/></svg>',
@@ -363,6 +364,11 @@
   function renderContact() {
     var box = $("#contactActions");
     if (!box || !S.contact) return;
+    var mail = $("#contactMail");
+    if (mail && S.contact.email) {
+      mail.href = "mailto:" + S.contact.email;
+      mail.innerHTML = I.mail + "<span>" + esc(S.contact.email) + "</span>";
+    }
     (S.contact.socials || []).forEach(function (s, i) {
       var a = el("a", "btn " + (i === 0 ? "btn--primary" : "btn--ghost"), (I[s.icon] || I.link) + esc(s.name));
       a.href = s.url || "#";

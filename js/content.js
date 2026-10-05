@@ -1,6 +1,6 @@
 /* ============================================================================
  *  content.js  —  网站所有可编辑内容
- *  数据来源：B 站 + 抖音 主页（PixelXYZ像素空间）
+ *  数据来源：B 站 + 抖音 + 小红书（PixelXYZ像素空间）
  *  修改本文件即可更新全站，无需改动 HTML。// TODO 处按需替换。
  * ==========================================================================*/
 
@@ -66,7 +66,8 @@ window.SITE = {
     socials: [
       { name: "哔哩哔哩", url: "https://space.bilibili.com/3546840876190266", icon: "bilibili" },
       { name: "抖音", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3", icon: "douyin" },
-      { name: "邮箱", url: "mailto:hello@example.com", icon: "mail" }, // TODO
+      { name: "小红书", url: "https://www.xiaohongshu.com/user/profile/6878bfff000000001e03ada7", icon: "xiaohongshu" },
+      { name: "邮箱", url: "mailto:19207560097@163.com", icon: "mail" },
     ],
     highlights: ["数码评测", "影像设备", "开箱体验", "科技资讯", "Vlog 相机", "手机影像"],
   },
@@ -111,10 +112,11 @@ window.SITE = {
       { type: "cmd", text: "ls ./topics" },
       { type: "out", text: "数码评测/  影像设备/  开箱体验/  科技资讯/" },
       { type: "cmd", text: "ls ./platforms" },
-      { type: "out", text: "bilibili/  douyin/  qq-group/" },
+      { type: "out", text: "bilibili/  douyin/  xiaohongshu/  qq-group/" },
       { type: "cmd", text: "echo $CHANNEL" },
-      { type: "out", text: "bili: fans=32 likes=287" },
-      { type: "out", text: "dy:   fans=100 likes=4814 works=5" },
+      { type: "out", text: "bili: fans=32   likes=287" },
+      { type: "out", text: "dy:   fans=100  likes=4814  works=5" },
+      { type: "out", text: "xhs:  fans=22   likes+saves=183" },
     ],
   },
 
@@ -128,6 +130,7 @@ window.SITE = {
       { label: "内容形式", value: "评测 / 开箱 / 混剪" },
       { label: "B 站 UID", value: "3546840876190266" },
       { label: "抖音号", value: "49256467732" },
+      { label: "小红书号", value: "95546159235" },
       { label: "创立初衷", value: "兴趣使然" },
     ],
   },
@@ -181,6 +184,19 @@ window.SITE = {
         ],
       },
       {
+        name: "小红书",
+        handle: "小红书号 95546159235",
+        icon: "xiaohongshu",
+        avatar: "assets/xhs_avatar.jpg",
+        url: "https://www.xiaohongshu.com/user/profile/6878bfff000000001e03ada7",
+        accent: "#ff2442",
+        stats: [
+          { label: "粉丝", value: 22 },
+          { label: "关注", value: 29 },
+          { label: "获赞与收藏", value: 183 },
+        ],
+      },
+      {
         name: "QQ 交流群",
         handle: "群号 1023501725",
         icon: "qq",
@@ -196,12 +212,13 @@ window.SITE = {
   contact: {
     subtitle: "FOLLOW & CONTACT",
     title: "保持关注",
-    text: "如果你想第一时间看到最新内容，欢迎在哔哩哔哩或抖音关注我；合作与交流也欢迎来信。",
-    email: "hello@example.com", // TODO
+    text: "如果你想第一时间看到最新内容，欢迎在哔哩哔哩、抖音或小红书关注我；合作与交流也欢迎来信。",
+    email: "19207560097@163.com",
     socials: [
       { name: "哔哩哔哩", url: "https://space.bilibili.com/3546840876190266", icon: "bilibili" },
       { name: "抖音", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3", icon: "douyin" },
-      { name: "邮箱", url: "mailto:hello@example.com", icon: "mail" }, // TODO
+      { name: "小红书", url: "https://www.xiaohongshu.com/user/profile/6878bfff000000001e03ada7", icon: "xiaohongshu" },
+      { name: "邮箱", url: "mailto:19207560097@163.com", icon: "mail" },
     ],
   },
 

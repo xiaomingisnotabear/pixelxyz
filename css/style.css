@@ -625,6 +625,17 @@ main, header, footer { position: relative; z-index: 1; }
 }
 .cta-card__title { font-size: clamp(1.9rem, 4.4vw, 3rem); font-weight: 800; letter-spacing: -0.04em; margin: 0 0 14px; }
 .cta-card__text { max-width: 34em; margin: 0 auto 30px; color: var(--text-2); font-size: 1.04rem; }
+.cta-card__mail {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin: 0 0 24px; padding: 8px 18px; border-radius: 999px;
+  font-family: var(--mono); font-size: 13.5px; font-weight: 600;
+  color: var(--accent);
+  border: 1px dashed color-mix(in srgb, var(--accent) 48%, transparent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  transition: background .3s, transform .3s var(--ease), border-color .3s;
+}
+.cta-card__mail:hover { background: color-mix(in srgb, var(--accent) 16%, transparent); transform: translateY(-2px); border-style: solid; }
+.cta-card__mail svg { width: 16px; height: 16px; }
 .cta-card__actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; }
 
 .footer { border-top: 1px solid var(--border); padding: 34px 0; }
@@ -648,7 +659,7 @@ main, header, footer { position: relative; z-index: 1; }
 /* ============================================================================
    12.5 多平台矩阵
    ==========================================================================*/
-.platforms { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.platforms { display: grid; grid-template-columns: repeat(auto-fit, minmax(252px, 1fr)); gap: 22px; }
 
 .platform {
   position: relative; display: flex; flex-direction: column; gap: 18px;
