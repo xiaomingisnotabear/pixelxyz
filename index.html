@@ -7,6 +7,7 @@
   <meta name="description" content="PixelXYZ像素空间 · 数码频道" />
   <meta name="theme-color" content="#050507" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="preload" as="image" href="assets/avatar.webp" fetchpriority="high" />
 
   <link rel="stylesheet" href="css/style.css" />
 
@@ -55,7 +56,7 @@
   <header class="nav" id="nav">
     <div class="container nav__inner">
       <a class="brand" href="#home">
-        <img class="brand__avatar" id="brandLogo" src="assets/avatar.jpg" alt="PixelXYZ像素空间" width="28" height="28" />
+        <img class="brand__avatar" id="brandLogo" src="assets/avatar.webp" alt="PixelXYZ像素空间" width="28" height="28" />
         <span class="brand__name" data-bind="brand.name">PixelXYZ</span>
       </a>
 
@@ -101,7 +102,7 @@
         <div class="hero__visual anim-in" style="--d:200ms" data-parallax="0.06">
           <div class="glow-avatar">
             <div class="glow-avatar__ring"></div>
-            <img id="heroAvatar" src="assets/avatar.jpg" alt="PixelXYZ像素空间" width="220" height="220" />
+            <img id="heroAvatar" src="assets/avatar.webp" alt="PixelXYZ像素空间" width="220" height="220" fetchpriority="high" decoding="async" />
           </div>
         </div>
       </div>
@@ -222,7 +223,7 @@
   <footer class="footer">
     <div class="container footer__inner">
       <div class="footer__left">
-        <img class="brand__avatar brand__avatar--sm" id="footerLogo" src="assets/avatar.jpg" alt="" width="22" height="22" />
+        <img class="brand__avatar brand__avatar--sm" id="footerLogo" src="assets/avatar.webp" alt="" width="22" height="22" />
         <span data-bind="footer.text">©</span>
       </div>
       <p class="footer__slogan" data-bind="footer.slogan">pixel infinity</p>
@@ -237,8 +238,8 @@
     <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
   </button>
 
-  <script src="js/content.js"></script>
-  <script src="js/particles.js"></script>
-  <script src="js/main.js"></script>
+  <script src="js/content.js" defer></script>
+  <script src="js/particles.js" defer></script>
+  <script src="js/main.js" defer></script>
 </body>
 </html>

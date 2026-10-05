@@ -795,6 +795,15 @@
     if (note && S.stats && S.stats.note) note.textContent = S.stats.note;
   }
 
+  /* ---------- Service Worker（本地强缓存，二次访问秒开） ---------- */
+  function initServiceWorker() {
+    if (!("serviceWorker" in navigator)) return;
+    if (location.protocol !== "https:" && location.hostname !== "localhost" && location.hostname !== "127.0.0.1") return;
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("sw.js").catch(function () { /* 不支持则静默忽略 */ });
+    });
+  }
+
   /* ---------- 启动 ---------- */
   function init() {
     bindText();
@@ -821,6 +830,7 @@
     initCursor();
     typeTagline();
     loadLiveStats();
+    initServiceWorker();
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

@@ -29,7 +29,7 @@ window.SITE = {
   brand: {
     name: "PixelXYZ",
     mark: "P",                      // logo 缺失时的字母回退
-    logo: "assets/avatar.jpg",      // 频道头像（导航 + 页脚）
+    logo: "assets/avatar.webp",      // 频道头像（导航 + 页脚）
   },
 
   nav: [
@@ -49,7 +49,7 @@ window.SITE = {
     sloganEn: "Pixel Infinity · Advance Courageously",
     tagline:
       "一个兴趣使然创办的数码频道，专注数码产品体验、影像设备与科技内容分享。",
-    avatar: "assets/avatar.jpg",
+    avatar: "assets/avatar.webp",
     cta: [
       { label: "关注 B 站", href: "https://space.bilibili.com/3546840876190266", primary: true, icon: "bilibili" },
       { label: "关注抖音", href: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3", primary: false, icon: "douyin" },
@@ -160,11 +160,11 @@ window.SITE = {
       { platform: "bilibili", kind: "article", title: "人生中第二卷胶片 & 也是玩上中画幅了（忽略瑕疵）", cover: "assets/opus8.webp", url: "https://www.bilibili.com/opus/1073170249769025537", comments: 6 },
 
       /* ---- 抖音（网页版不提供标题，以封面墙呈现） ---- */
-      { platform: "douyin", kind: "clip", cover: "assets/dy1.png", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3" },
-      { platform: "douyin", kind: "clip", cover: "assets/dy2.png", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3" },
-      { platform: "douyin", kind: "clip", cover: "assets/dy3.png", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3" },
-      { platform: "douyin", kind: "clip", cover: "assets/dy4.png", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3" },
-      { platform: "douyin", kind: "clip", cover: "assets/dy5.png", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3" },
+      { platform: "douyin", kind: "clip", cover: "assets/dy1.webp", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3" },
+      { platform: "douyin", kind: "clip", cover: "assets/dy2.webp", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3" },
+      { platform: "douyin", kind: "clip", cover: "assets/dy3.webp", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3" },
+      { platform: "douyin", kind: "clip", cover: "assets/dy4.webp", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3" },
+      { platform: "douyin", kind: "clip", cover: "assets/dy5.webp", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3" },
     ],
   },
 
@@ -177,18 +177,18 @@ window.SITE = {
     items: [
       {
         key: "bilibili", name: "哔哩哔哩", handle: "UID 3546840876190266", icon: "bilibili",
-        avatar: "assets/avatar.jpg", url: "https://space.bilibili.com/3546840876190266",
+        avatar: "assets/avatar.webp", url: "https://space.bilibili.com/3546840876190266",
         stats: [{ key: "fans", label: "粉丝", value: 32 }, { key: "likes", label: "获赞", value: 287 }, { label: "投稿", value: 13 }],
       },
       {
         key: "douyin", name: "抖音", handle: "抖音号 49256467732", icon: "douyin",
-        avatar: "assets/dy_avatar.jpg",
+        avatar: "assets/dy_avatar.webp",
         url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3",
         stats: [{ key: "fans", label: "粉丝", value: 100 }, { key: "likes", label: "获赞", value: 4814 }, { label: "作品", value: 5 }],
       },
       {
         key: "xiaohongshu", name: "小红书", handle: "小红书号 95546159235", icon: "xiaohongshu",
-        avatar: "assets/xhs_avatar.jpg",
+        avatar: "assets/xhs_avatar.webp",
         url: "https://www.xiaohongshu.com/user/profile/6878bfff000000001e03ada7",
         stats: [{ key: "fans", label: "粉丝", value: 22 }, { key: "likes", label: "获赞与收藏", value: 183 }, { label: "关注", value: 29 }],
       },
