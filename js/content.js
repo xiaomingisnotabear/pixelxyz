@@ -136,9 +136,7 @@ window.SITE = {
     title: "作品",
     more: { label: "查看全部投稿", url: "https://space.bilibili.com/3546840876190266/video" },
     filters: [
-      { id: "all", label: "全部" },
-      { id: "video", label: "视频" },
-      { id: "article", label: "图文" },
+      { id: "bilibili", label: "哔哩哔哩" },
       { id: "douyin", label: "抖音" },
     ],
     items: [
@@ -148,16 +146,6 @@ window.SITE = {
       { platform: "bilibili", kind: "video", title: "只要69元就能买Pocket3？小心陷阱!", cover: "assets/v3.webp", url: "https://www.bilibili.com/video/BV1frDmB4EkL/", date: "4月12日", views: 3056, danmaku: 0, duration: "00:48" },
       { platform: "bilibili", kind: "video", title: "学生党必看!低预算也能买相机!500-4000元相机推荐", cover: "assets/v4.webp", url: "https://www.bilibili.com/video/BV1FdhXzyEAR/", date: "2025年8月29日", views: 2767, danmaku: 1, duration: "04:58" },
       { platform: "bilibili", kind: "video", title: "可能是1.5K以内最好的vlog相机？大疆Pocket2浅谈", cover: "assets/v5.webp", url: "https://www.bilibili.com/video/BV1ruVXzPEUT/", date: "2025年5月10日", views: 5481, danmaku: 34, duration: "07:41" },
-
-      /* ---- 哔哩哔哩 · 图文 ---- */
-      { platform: "bilibili", kind: "article", title: "轻舟已过万重山！", cover: "assets/opus1.webp", url: "https://www.bilibili.com/opus/1247955507289784344", comments: 1 },
-      { platform: "bilibili", kind: "article", title: "华为FreeClip2｜好用但我不喜欢", cover: "assets/opus2.webp", url: "https://www.bilibili.com/opus/1244882290631245843", comments: 1 },
-      { platform: "bilibili", kind: "article", title: "分享图片", cover: "assets/opus3.webp", url: "https://www.bilibili.com/opus/1232152557332201523", comments: 3 },
-      { platform: "bilibili", kind: "article", title: "「60个月不卡」", cover: "assets/opus4.webp", url: "https://www.bilibili.com/opus/1225474995581354004", comments: 2 },
-      { platform: "bilibili", kind: "article", title: "图片分享", cover: "assets/opus5.webp", url: "https://www.bilibili.com/opus/1119488083362840580", comments: 6 },
-      { platform: "bilibili", kind: "article", title: "频道设备鸟枪换炮咯", cover: "assets/opus6.webp", url: "https://www.bilibili.com/opus/1116140714709745669", comments: 4 },
-      { platform: "bilibili", kind: "article", title: "今天是世界摄影日，大家节日快乐！", cover: "assets/opus7.webp", url: "https://www.bilibili.com/opus/1102740373787115529", comments: 6 },
-      { platform: "bilibili", kind: "article", title: "人生中第二卷胶片 & 也是玩上中画幅了（忽略瑕疵）", cover: "assets/opus8.webp", url: "https://www.bilibili.com/opus/1073170249769025537", comments: 6 },
 
       /* ---- 抖音（网页版不提供标题，以封面墙呈现） ---- */
       { platform: "douyin", kind: "clip", cover: "assets/dy1.webp", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3" },
@@ -177,18 +165,16 @@ window.SITE = {
     items: [
       {
         key: "bilibili", name: "哔哩哔哩", handle: "UID 3546840876190266", icon: "bilibili",
-        avatar: "assets/avatar.webp", url: "https://space.bilibili.com/3546840876190266",
+        url: "https://space.bilibili.com/3546840876190266",
         stats: [{ key: "fans", label: "粉丝", value: 32 }, { key: "likes", label: "获赞", value: 287 }, { label: "投稿", value: 13 }],
       },
       {
         key: "douyin", name: "抖音", handle: "抖音号 49256467732", icon: "douyin",
-        avatar: "assets/dy_avatar.webp",
         url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3",
         stats: [{ key: "fans", label: "粉丝", value: 100 }, { key: "likes", label: "获赞", value: 4814 }, { label: "作品", value: 5 }],
       },
       {
         key: "xiaohongshu", name: "小红书", handle: "小红书号 95546159235", icon: "xiaohongshu",
-        avatar: "assets/xhs_avatar.webp",
         url: "https://www.xiaohongshu.com/user/profile/6878bfff000000001e03ada7",
         stats: [{ key: "fans", label: "粉丝", value: 22 }, { key: "likes", label: "获赞与收藏", value: 183 }, { label: "关注", value: 29 }],
       },
