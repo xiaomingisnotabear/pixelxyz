@@ -276,7 +276,13 @@ main, header, footer { position: relative; z-index: 1; }
 [data-theme="light"] .i-sun { display: none; }
 [data-theme="light"] .i-moon { display: block; }
 
-.nav__burger { display: none; flex-direction: column; gap: 5px; }
+.nav__burger {
+  display: none; flex-direction: column; gap: 5px;
+  /* 注意：这里 display 从 grid 变成 flex 后，.icon-btn 的 place-items 只剩
+     align-items 生效，justify-items 对 flex 无效 —— 主轴居中必须靠 justify-content，
+     否则两根横线会被顶到按钮顶部 */
+  align-items: center; justify-content: center;
+}
 .nav__burger span { width: 15px; height: 1.5px; background: currentColor; border-radius: 2px; transition: transform .3s var(--ease); }
 .nav.is-open .nav__burger span:nth-child(1) { transform: translateY(3.25px) rotate(45deg); }
 .nav.is-open .nav__burger span:nth-child(2) { transform: translateY(-3.25px) rotate(-45deg); }
