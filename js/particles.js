@@ -19,11 +19,9 @@
   /* 读取主题色 */
   function readColors() {
     var root = getComputedStyle(document.documentElement);
-    return {
-      a: (root.getPropertyValue("--accent") || "#0a84ff").trim(),
-      b: (root.getPropertyValue("--accent-2") || "#5e5ce6").trim(),
-      dark: document.documentElement.getAttribute("data-theme") !== "light",
-    };
+    var p = (root.getPropertyValue("--particle") || "").trim() ||
+            (root.getPropertyValue("--accent") || "#ffffff").trim();
+    return { a: p, b: p, dark: document.documentElement.getAttribute("data-theme") !== "light" };
   }
   var C = readColors();
 

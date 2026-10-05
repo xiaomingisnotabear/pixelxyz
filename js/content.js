@@ -12,19 +12,16 @@ window.SITE = {
     description:
       "PixelXYZ像素空间 — 一个兴趣使然创办的数码频道。「pixel infinity, advance courageously / 像素无限，一往无前」",
     favicon: "assets/favicon.svg",
-    accent: "#0a84ff",
-    accent2: "#5e5ce6",
-    accent3: "#ff375f",
     theme: "dark",
   },
 
   /* ---------- 特效开关 ---------- */
   effects: {
     particles: true,       // 点阵星空背景
-    particleLinks: true,   // 粒子之间连线（赛博风）
+    particleLinks: true,   // 粒子之间连线
     mouseRepel: true,      // 鼠标靠近时粒子排斥散开
-    customCursor: true,    // 自定义终端风格光标（仅桌面端）
-    scanLines: true,       // 卡片底部扫描发光线条
+    customCursor: true,    // 自定义光标（仅桌面端）
+    scanLines: true,       // 卡片扫描发光线条
     typewriter: true,      // 打字机动画
   },
 
@@ -67,22 +64,28 @@ window.SITE = {
       { name: "哔哩哔哩", url: "https://space.bilibili.com/3546840876190266", icon: "bilibili" },
       { name: "抖音", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3", icon: "douyin" },
       { name: "小红书", url: "https://www.xiaohongshu.com/user/profile/6878bfff000000001e03ada7", icon: "xiaohongshu" },
-      { name: "邮箱", url: "mailto:19207560097@163.com", icon: "mail" },
     ],
     highlights: ["数码评测", "影像设备", "开箱体验", "科技资讯", "Vlog 相机", "手机影像"],
   },
 
-  /* ---------- B 站数据面板 ---------- */
+  /* ---------- 全平台数据统计 ---------- */
   stats: {
-    subtitle: "CHANNEL DATA",
-    title: "频道数据",
-    items: [
-      { label: "粉丝", value: 32, suffix: "" },
-      { label: "获赞", value: 287, suffix: "" },
-      { label: "关注", value: 79, suffix: "" },
-      { label: "投稿", value: 13, suffix: "" },
+    subtitle: "ALL PLATFORMS",
+    title: "全平台数据",
+    note: "数据同步自哔哩哔哩、抖音、小红书公开主页",
+    totals: [
+      { label: "全平台粉丝", value: 154 },
+      { label: "全平台获赞", value: 5284 },
+      { label: "入驻平台", value: 3 },
     ],
-    note: "哔哩哔哩频道数据 · 数据同步自公开主页",
+    breakdown: {
+      title: "各平台明细",
+      items: [
+        { name: "哔哩哔哩", icon: "bilibili", fans: 32, likes: 287 },
+        { name: "抖音", icon: "douyin", fans: 100, likes: 4814 },
+        { name: "小红书", icon: "xiaohongshu", fans: 22, likes: 183 },
+      ],
+    },
   },
 
   /* ---------- 内容方向（进度条） ---------- */
@@ -115,7 +118,7 @@ window.SITE = {
       { type: "out", text: "bilibili/  douyin/  xiaohongshu/  qq-group/" },
       { type: "cmd", text: "echo $CHANNEL" },
       { type: "out", text: "bili: fans=32   likes=287" },
-      { type: "out", text: "dy:   fans=100  likes=4814  works=5" },
+      { type: "out", text: "dy:   fans=100  likes=4814" },
       { type: "out", text: "xhs:  fans=22   likes+saves=183" },
     ],
   },
@@ -163,7 +166,6 @@ window.SITE = {
         icon: "bilibili",
         avatar: "assets/avatar.jpg",
         url: "https://space.bilibili.com/3546840876190266",
-        accent: "#00a1d6",
         stats: [
           { label: "粉丝", value: 32 },
           { label: "获赞", value: 287 },
@@ -176,7 +178,6 @@ window.SITE = {
         icon: "douyin",
         avatar: "assets/dy_avatar.jpg",
         url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3",
-        accent: "#fe2c55",
         stats: [
           { label: "粉丝", value: 100 },
           { label: "获赞", value: 4814 },
@@ -189,7 +190,6 @@ window.SITE = {
         icon: "xiaohongshu",
         avatar: "assets/xhs_avatar.jpg",
         url: "https://www.xiaohongshu.com/user/profile/6878bfff000000001e03ada7",
-        accent: "#ff2442",
         stats: [
           { label: "粉丝", value: 22 },
           { label: "关注", value: 29 },
@@ -200,8 +200,7 @@ window.SITE = {
         name: "QQ 交流群",
         handle: "群号 1023501725",
         icon: "qq",
-        accent: "#12b7f5",
-        copy: "1023501725",       // 一键复制群号
+        copy: "1023501725",
         copyLabel: "复制群号",
         stats: [],
       },
@@ -212,13 +211,12 @@ window.SITE = {
   contact: {
     subtitle: "FOLLOW & CONTACT",
     title: "保持关注",
-    text: "如果你想第一时间看到最新内容，欢迎在哔哩哔哩、抖音或小红书关注我；合作与交流也欢迎来信。",
+    text: "如果你想第一时间看到最新内容，欢迎在哔哩哔哩、抖音或小红书关注我。",
     email: "19207560097@163.com",
     socials: [
       { name: "哔哩哔哩", url: "https://space.bilibili.com/3546840876190266", icon: "bilibili" },
       { name: "抖音", url: "https://www.douyin.com/user/MS4wLjABAAAA4LfrgNCkb6zvMb5bG7VSvdTPf-j_M-eFBGeigFmVtT9rBdOaH4Tv46X7yw5lT8d3", icon: "douyin" },
       { name: "小红书", url: "https://www.xiaohongshu.com/user/profile/6878bfff000000001e03ada7", icon: "xiaohongshu" },
-      { name: "邮箱", url: "mailto:19207560097@163.com", icon: "mail" },
     ],
   },
 
@@ -226,5 +224,6 @@ window.SITE = {
   footer: {
     text: "© 2026 PixelXYZ像素空间 · 保留所有权利",
     slogan: "pixel infinity, advance courageously",
+    emailLabel: "邮箱",
   },
 };

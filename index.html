@@ -131,6 +131,11 @@
 
         <div class="stats" id="statsGrid"><!-- JS --></div>
 
+        <div class="breakdown" id="breakdown">
+          <h3 class="breakdown__title" data-reveal data-bind="stats.breakdown.title">各平台明细</h3>
+          <div class="breakdown__rows" id="breakdownRows"><!-- JS --></div>
+        </div>
+
         <div class="divider" data-reveal><span class="divider__glow"></span></div>
 
         <div class="focus">
@@ -212,7 +217,6 @@
           <p class="sec-head__sub" data-bind="contact.subtitle">FOLLOW</p>
           <h2 class="cta-card__title" data-bind="contact.title">保持关注</h2>
           <p class="cta-card__text" data-bind="contact.text">...</p>
-          <a class="cta-card__mail" id="contactMail" href="#"><!-- JS --></a>
           <div class="cta-card__actions" id="contactActions"><!-- JS --></div>
         </div>
       </div>
@@ -226,6 +230,10 @@
         <span data-bind="footer.text">©</span>
       </div>
       <p class="footer__slogan" data-bind="footer.slogan">pixel infinity</p>
+    </div>
+    <div class="container footer__mail">
+      <span class="footer__mail-label" data-bind="footer.emailLabel">邮箱</span>
+      <span class="footer__mail-value" data-bind="contact.email">19207560097@163.com</span>
     </div>
   </footer>
 

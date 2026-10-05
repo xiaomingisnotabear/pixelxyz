@@ -107,8 +107,8 @@
   /* ---------- 数据卡片 ---------- */
   function renderStats() {
     var box = $("#statsGrid");
-    if (!box || !S.stats || !S.stats.items) return;
-    S.stats.items.forEach(function (s, i) {
+    if (!box || !S.stats || !S.stats.totals) return;
+    S.stats.totals.forEach(function (s, i) {
       var card = el("div", "stat");
       card.setAttribute("data-reveal", "");
       card.setAttribute("data-reveal-delay", String(Math.min(i, 4)));
@@ -164,6 +164,50 @@
           if (p < 1) requestAnimationFrame(step);
         });
       }, delay);
+    });
+  }
+
+  /* ---------- 各平台明细 ---------- */
+  function pct(v, total) {
+    if (!total) return 0;
+    return Math.max(2, Math.round((Number(v) || 0) / total * 1000) / 10);
+  }
+
+  function renderBreakdown() {
+    var box = $("#breakdownRows");
+    if (!box || !S.stats || !S.stats.breakdown || !S.stats.breakdown.items) return;
+    var items = S.stats.breakdown.items;
+    var totFans = items.reduce(function (a, b) { return a + (Number(b.fans) || 0); }, 0);
+    var totLikes = items.reduce(function (a, b) { return a + (Number(b.likes) || 0); }, 0);
+
+    items.forEach(function (it, i) {
+      var row = el("div", "prow");
+      row.setAttribute("data-reveal", "");
+      row.setAttribute("data-reveal-delay", String(Math.min(i, 2)));
+      row.innerHTML =
+        '<div class="prow__name">' + (I[it.icon] || I.link) + "<span>" + esc(it.name) + "</span></div>" +
+        '<div class="prow__metrics">' +
+          '<div class="metric">' +
+            '<div class="metric__top"><span class="metric__label">粉丝</span><b class="metric__val">' + fmtNum(it.fans) + "</b></div>" +
+            '<div class="metric__track"><span class="metric__fill" data-w="' + pct(it.fans, totFans) + '"></span></div>' +
+          "</div>" +
+          '<div class="metric">' +
+            '<div class="metric__top"><span class="metric__label">获赞</span><b class="metric__val">' + fmtNum(it.likes) + "</b></div>" +
+            '<div class="metric__track"><span class="metric__fill" data-w="' + pct(it.likes, totLikes) + '"></span></div>' +
+          "</div>" +
+        "</div>";
+      box.appendChild(row);
+    });
+  }
+
+  function animateMetrics() {
+    $all(".metric__fill").forEach(function (fill, i) {
+      if (fill.getAttribute("data-done")) return;
+      fill.setAttribute("data-done", "1");
+      var val = parseFloat(fill.getAttribute("data-w")) || 0;
+      if (reduceMotion) { fill.style.width = val + "%"; return; }
+      fill.style.transitionDelay = (i * 90) + "ms";
+      requestAnimationFrame(function () { fill.style.width = val + "%"; });
     });
   }
 
@@ -364,11 +408,6 @@
   function renderContact() {
     var box = $("#contactActions");
     if (!box || !S.contact) return;
-    var mail = $("#contactMail");
-    if (mail && S.contact.email) {
-      mail.href = "mailto:" + S.contact.email;
-      mail.innerHTML = I.mail + "<span>" + esc(S.contact.email) + "</span>";
-    }
     (S.contact.socials || []).forEach(function (s, i) {
       var a = el("a", "btn " + (i === 0 ? "btn--primary" : "btn--ghost"), (I[s.icon] || I.link) + esc(s.name));
       a.href = s.url || "#";
@@ -437,6 +476,7 @@
     if (reduceMotion || !("IntersectionObserver" in window)) {
       items.forEach(function (n) { n.classList.add("is-in"); });
       animateBars();
+      animateMetrics();
       return;
     }
     if (!revealObserver) {
@@ -456,6 +496,15 @@
       }, { threshold: 0.3 });
       bio.observe(bars);
     }
+
+    /* 各平台明细：进入视口时填充 */
+    var bd = $("#breakdown");
+    if (bd) {
+      var bdio = new IntersectionObserver(function (es) {
+        es.forEach(function (e) { if (e.isIntersecting) { bdio.disconnect(); animateMetrics(); } });
+      }, { threshold: 0.25 });
+      bdio.observe(bd);
+    }
   }
 
   /* ---------- 滚动兜底（防快速跳转漏触发） ---------- */
@@ -469,6 +518,8 @@
       });
       var fb = $("#focusBars");
       if (fb && fb.getBoundingClientRect().top < vh * 0.9) animateBars();
+      var bd = $("#breakdown");
+      if (bd && bd.getBoundingClientRect().top < vh * 0.9) animateMetrics();
       $all(".stat[data-count]:not([data-counted])").forEach(function (c) {
         if (c.getBoundingClientRect().top < vh * 0.95) runCounter(c);
       });
@@ -588,6 +639,7 @@
     renderHero();
     renderMarquee();
     renderStats();
+    renderBreakdown();
     renderFocus();
     renderAbout();
     renderTerminal();
