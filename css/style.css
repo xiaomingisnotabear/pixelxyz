@@ -28,9 +28,10 @@
   --haze-2: 6%;
 
   /* ---- iOS 26 风大圆角（连续圆角靠 @supports 里的 corner-shape 增强）---- */
-  --radius: 24px;
-  --radius-sm: 16px;
-  --radius-lg: 34px;
+  --radius: 30px;        /* 卡片 / 栅格容器 */
+  --radius-sm: 20px;     /* 按钮 / 标签 / 筛选 */
+  --radius-lg: 44px;     /* 大面板 / 展开抽屉 */
+  --radius-xs: 12px;     /* 小徽章 */
   --radius-pill: 999px;
 
   /* ---- Liquid Glass（黑白单色版的液态玻璃）---- */
@@ -38,6 +39,8 @@
   --glass-brd: color-mix(in srgb, var(--text) 13%, transparent);
   --glass-hi: color-mix(in srgb, var(--text) 22%, transparent);
   --glass-blur: saturate(180%) blur(26px);
+  /* 下拉面板/展开态用更实的玻璃，保证文字可读 */
+  --sheet-bg: color-mix(in srgb, var(--bg) 88%, transparent);
 
 
   /* 开关滑块 / 按钮 —— 快而利落，收尾几乎不过冲 */
@@ -63,6 +66,11 @@
 
   /* 移动端安全区（刘海 / 灵动岛 / 底部横条 / 横屏圆角）
      非全面屏设备上这些值都是 0，所以桌面端完全无副作用 */
+  /* 顶栏离屏幕顶部的留白 —— 之前是 0，胶囊直接贴着上边缘，很怪 */
+  --nav-top: 12px;
+  /* 悬浮状态下左右再收一点，让它更像一块浮起来的玻璃 */
+  --nav-gap-x: 10px;
+
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bot: env(safe-area-inset-bottom, 0px);
   --safe-l: env(safe-area-inset-left, 0px);
@@ -114,7 +122,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: calc(var(--nav-h) + var(--safe-top) + 20px);
+  scroll-padding-top: calc(var(--nav-h) + var(--nav-top) + var(--safe-top) + 20px);
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;   /* 点按不再闪灰色方块 */
 }
@@ -264,8 +272,14 @@ main, header, footer { position: relative; z-index: 1; }
    （滚动后胶囊会缩放 / 上浮 / 变成液态玻璃 —— 参考 iOS 26 的 Tab Bar） */
 .nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  padding: var(--safe-top) var(--safe-r) 0 var(--safe-l);
+  padding: calc(var(--safe-top) + var(--nav-top)) var(--safe-r) 0 var(--safe-l);
   pointer-events: none;
+  transition: padding var(--dur-nav) var(--spring-soft);
+}
+/* 悬浮时左右再收一点，形成"整块浮起"的观感 */
+.nav.is-float {
+  padding-left: calc(var(--safe-l) + var(--nav-gap-x));
+  padding-right: calc(var(--safe-r) + var(--nav-gap-x));
 }
 /* z-index 高于下面的菜单面板 —— 菜单滑出时会被顶栏挡住，
    视觉上就是「从顶栏底下长出来」而不是「从最顶层飞下来」 */
@@ -336,7 +350,7 @@ main, header, footer { position: relative; z-index: 1; }
   background: var(--text); color: var(--bg);
   font-size: 13px; font-weight: 700;
 }
-.brand__mark--sm { width: 22px; height: 22px; font-size: 11px; border-radius: 6px; }
+.brand__mark--sm { width: 22px; height: 22px; font-size: 11px; border-radius: 9px; }
 .brand__text {
   display: inline-flex; align-items: baseline; gap: 6px;
   max-width: 240px; overflow: hidden; white-space: nowrap;
@@ -653,9 +667,9 @@ main, header, footer { position: relative; z-index: 1; }
 .metric__top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .metric__label { font-size: 11px; font-weight: 500; letter-spacing: .12em; color: var(--text-3); text-transform: uppercase; }
 .metric__val { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--text); }
-.metric__track { position: relative; height: 2px; border-radius: 2px; overflow: hidden; background: var(--surface-2); }
+.metric__track { position: relative; height: 3px; border-radius: 3px; overflow: hidden; background: var(--surface-2); }
 .metric__fill {
-  position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 2px;
+  position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 3px;
   background: var(--text);
   transition: width 1.15s var(--spring-fluid);
 }
@@ -673,9 +687,9 @@ main, header, footer { position: relative; z-index: 1; }
 .bar__top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .bar__label { font-size: 14px; font-weight: 500; color: var(--text); }
 .bar__val { font-size: 12.5px; font-weight: 500; color: var(--text-3); font-variant-numeric: tabular-nums; }
-.bar__track { position: relative; height: 2px; border-radius: 2px; overflow: hidden; background: var(--surface-2); }
+.bar__track { position: relative; height: 3px; border-radius: 3px; overflow: hidden; background: var(--surface-2); }
 .bar__fill {
-  position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 2px;
+  position: absolute; inset: 0 auto 0 0; width: 0; border-radius: 3px;
   background: var(--text);
   transition: width 1.4s var(--spring-fluid);
 }
@@ -704,14 +718,15 @@ main, header, footer { position: relative; z-index: 1; }
 .terminal__dot { width: 8px; height: 8px; border-radius: 50%; border: 1px solid rgba(255,255,255,.28); }
 .terminal__title { margin-left: 10px; font-size: 11.5px; color: #6f6f6f; letter-spacing: .02em; }
 
-.terminal__body { position: relative; z-index: 1; padding: 24px 22px 28px; min-height: 330px; font-size: 13px; line-height: 2; }
+.terminal__body { border-radius: 0 0 var(--radius) var(--radius); position: relative; z-index: 1; padding: 24px 22px 28px; min-height: 330px; font-size: 13px; line-height: 2; }
 .tline { display: block; white-space: pre-wrap; word-break: break-word; }
 .tline--cmd { color: #e8e8e8; }
 .tline--cmd::before { content: "$ "; color: #5e5e5e; }
 .tline--out { color: #8a8a8a; padding-left: 16px; }
 .tcaret { display: inline-block; width: 7px; height: 14px; margin-left: 2px; background: #e8e8e8; vertical-align: -2px; animation: blink 1.1s step-end infinite; }
 
-.profile { padding: 32px 28px; background: var(--bg); }
+.profile {
+  border-radius: var(--radius); padding: 32px 28px; background: var(--bg); }
 .profile__title { font-size: 1.15rem; font-weight: 600; margin: 0 0 18px; }
 .about__facts { display: grid; }
 .about__facts li {
@@ -752,7 +767,7 @@ main, header, footer { position: relative; z-index: 1; }
 
 .video__dur {
   position: absolute; right: 10px; bottom: 10px; z-index: 2;
-  padding: 2px 7px; border-radius: 4px;
+  padding: 3px 9px; border-radius: var(--radius-xs);
   background: rgba(0,0,0,.72); color: #fff;
   font-size: 11px; font-weight: 500; font-variant-numeric: tabular-nums;
 }
@@ -839,7 +854,7 @@ main, header, footer { position: relative; z-index: 1; }
 .footer__mail-value {
   font-family: var(--mono); font-size: 13px; font-weight: 400;
   color: var(--text-2); user-select: all;
-  padding: 4px 10px; border-radius: 6px;
+  padding: 5px 12px; border-radius: 14px;
   border: 1px solid var(--border);
   transition: color .2s, border-color .2s;
 }
@@ -863,10 +878,10 @@ main, header, footer { position: relative; z-index: 1; }
    15. 品牌 logo / 作品筛选 / 封面墙 / 键盘焦点
    ==========================================================================*/
 .brand__avatar {
-  width: 28px; height: 28px; border-radius: 10px; object-fit: cover; flex: none;
+  width: 28px; height: 28px; border-radius: 12px; object-fit: cover; flex: none;
   border: 1px solid var(--border-2);
 }
-.brand__avatar--sm { width: 22px; height: 22px; border-radius: 8px; }
+.brand__avatar--sm { width: 22px; height: 22px; border-radius: 10px; }
 
 /* 筛选栏 */
 .filters { display: flex; flex-wrap: wrap; gap: 6px; margin: -32px 0 30px; }
@@ -926,23 +941,38 @@ main, header, footer { position: relative; z-index: 1; }
 
 @media (max-width: 720px) {
   .container { padding-left: calc(20px + var(--safe-l)); padding-right: calc(20px + var(--safe-r)); }
-  /* 菜单打开时胶囊恢复满宽实色、去掉圆角，和下面的下拉面板拼成一体 */
+  /* 展开菜单：胶囊 + 下拉面板拼成一整块「大圆角玻璃面板」。
+     ⚠️ 关键：这里【保留液态玻璃】而不是切成实色 ——
+     之前打开菜单时同时发生「玻璃淡出 + 实色淡入 + 宽度 296→390 + 高度 54→60 + 缩放归位」，
+     五件事一起打架，从悬浮态点开就显得很生硬。现在玻璃一直在，只是形体在形变。 */
   .nav.is-open .nav__inner {
     max-width: var(--container);
-    border-radius: 0;
-    background: var(--bg);
-    box-shadow: 0 1px 0 0 var(--border);   /* 代替 border，避免包含块偏移 */
+    /* 胶囊只有 60px 高，44px 圆角会夸张成拱形；用 --radius 更协调。
+       面板高得多，底部保留 --radius-lg 的大 R。 */
+    border-radius: var(--radius) var(--radius) 0 0;
     transform: none;
   }
-  .nav.is-open .nav__inner::before { opacity: 0; }
+  .nav.is-open .nav__inner::before {
+    opacity: 1;
+    border-color: transparent;
+    box-shadow: 0 24px 64px -28px rgba(0, 0, 0, .72);
+  }
+  .nav.is-open .nav__links {
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+    box-shadow: 0 24px 64px -28px rgba(0, 0, 0, .72);
+  }
 
   .nav__links {
-    position: fixed; top: calc(var(--nav-h) + var(--safe-top)); left: 0; right: 0;
+    /* ⚠️ .nav__inner 有 will-change:transform，会成为 fixed 元素的包含块，
+       所以这里的 top/left/right 是相对【胶囊的 padding box】，不是视口。
+       以前写成 calc(var(--nav-h) + var(--safe-top))，在有刘海的安全区里
+       （PWA/独立窗口）会多推一个 safe-top 的高度，位置全错。 */
+    position: fixed; top: var(--nav-h); left: 0; right: 0;
     z-index: 1;
     flex-direction: column; align-items: stretch; gap: 2px; padding: 14px 20px 18px;
-    background: color-mix(in srgb, var(--bg) 96%, transparent);
-    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
-    border-bottom: 1px solid var(--border);
+    background: var(--sheet-bg);
+    backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
+    border-bottom: none;
 
     /* ⚠️ 这里刻意不用 translateY 位移：
        位移会让面板从屏幕顶部"飞过来"，途中经过顶栏上方，看起来像从最顶层掉下来。

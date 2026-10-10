@@ -577,8 +577,9 @@
     burger.addEventListener("click", function () {
       var open = nav.classList.toggle("is-open");
       burger.setAttribute("aria-expanded", open ? "true" : "false");
-      /* 菜单展开时顶栏必须是满宽实色，否则下拉面板接不上 */
-      if (open) nav.classList.remove("is-mini", "is-float");
+      /* 展开菜单：只收起「最小化」，保留悬浮玻璃 ——
+         让胶囊平滑地从 296px 长到满宽，而不是玻璃突然消失换成实色 */
+      if (open) { nav.classList.remove("is-mini"); nav.classList.add("is-float"); }
       else if (scrollUpdate) scrollUpdate();
     });
 
