@@ -115,7 +115,9 @@
   .btn, .social-chip, .filter, .video, .platform, .stat, .cta-card,
   .terminal, .profile, .icon-btn, .switch, .nav__inner, .to-top,
   .live-wall span, .hero__cta a { corner-shape: squircle; }
-  .nav.is-float .nav__inner, .switch, .switch__knob { corner-shape: round; }
+  /* 贴边的小元件必须用「正圆弧」，不能 squircle：
+     squircle 的角会往外撑，紧贴胶囊弧形边缘时会顶出去、描边和边缘粘在一起 */
+  .nav.is-float .nav__inner, .switch, .switch__knob, .nav__burger { corner-shape: round; }
 }
 
 /* ---------- Reset ---------- */
@@ -336,7 +338,9 @@ main, header, footer { position: relative; z-index: 1; }
 .nav.is-mini .nav__inner {
   max-width: 296px;
   height: 54px;
-  padding-left: 10px; padding-right: 6px;
+  /* 左右内边距对称。右侧不能小于 10px：汉堡按钮（44px，带描边）在胶囊
+     弧形端头里需要这个余量，否则它的圆角矩形会顶到胶囊边缘上被切掉一块 */
+  padding-left: 10px; padding-right: 10px;
   transform: translateY(-2px) scale(.965);
 }
 .nav.is-mini .nav__links { max-width: 0; opacity: 0; pointer-events: none; visibility: hidden; }
