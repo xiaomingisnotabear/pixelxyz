@@ -241,7 +241,12 @@ main, header, footer { position: relative; z-index: 1; }
   -webkit-backdrop-filter: saturate(180%) blur(18px);
   border-bottom-color: var(--border);
 }
-.nav__inner { height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+/* z-index 高于下面的菜单面板 —— 菜单滑出时会被顶栏挡住，
+   视觉上就是「从顶栏底下长出来」而不是「从最顶层飞下来」 */
+.nav__inner {
+  position: relative; z-index: 2;
+  height: 100%; display: flex; align-items: center; justify-content: space-between; gap: 18px;
+}
 
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 600; }
 .brand__mark {
@@ -760,16 +765,43 @@ main, header, footer { position: relative; z-index: 1; }
 
 @media (max-width: 720px) {
   .container { padding-left: calc(20px + var(--safe-l)); padding-right: calc(20px + var(--safe-r)); }
+  /* 菜单打开时顶栏变实色：面板从它下面滑过时会被完全遮住，
+     看起来就是从顶栏底边长出来的（之前顶栏透明，面板会盖在它上面） */
+  .nav.is-open {
+    background: var(--bg);
+    border-bottom-color: var(--border);
+  }
+
   .nav__links {
     position: fixed; top: calc(var(--nav-h) + var(--safe-top)); left: 0; right: 0;
+    z-index: 1;
     flex-direction: column; align-items: stretch; gap: 2px; padding: 14px 20px 18px;
     background: color-mix(in srgb, var(--bg) 96%, transparent);
     backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
     border-bottom: 1px solid var(--border);
-    transform: translateY(-130%); opacity: 0; pointer-events: none;
-    transition: transform .4s var(--ease), opacity .3s;
+
+    /* ⚠️ 这里刻意不用 translateY 位移：
+       位移会让面板从屏幕顶部"飞过来"，途中经过顶栏上方，看起来像从最顶层掉下来。
+       而且父元素的背景永远盖不住子元素，加 z-index 也没用。
+       改用 clip-path 把面板从【底边】裁掉 —— 面板原地不动、顶边恒在顶栏底边，
+       展开时只是向下"揭开"，视觉上就是从顶栏底下长出来。 */
+    clip-path: inset(0 0 100% 0);
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    transition: clip-path .38s var(--ease-soft),
+                opacity .3s var(--ease-soft),
+                visibility 0s linear .38s;
   }
-  .nav.is-open .nav__links { transform: none; opacity: 1; pointer-events: auto; }
+  .nav.is-open .nav__links {
+    clip-path: inset(0 0 0 0);
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+    transition: clip-path .38s var(--ease-soft),
+                opacity .3s var(--ease-soft),
+                visibility 0s linear 0s;
+  }
   .nav__link { padding: 13px 14px; border-radius: var(--radius-sm); font-size: 15px; min-height: 46px; display: flex; align-items: center; }
   .nav__burger { display: grid; }
 
