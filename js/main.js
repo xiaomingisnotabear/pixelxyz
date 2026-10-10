@@ -535,12 +535,33 @@
 
   function initTheme() {
     syncThemeColor();
-    var btn = $("#themeToggle"); if (!btn) return;
-    btn.addEventListener("click", function () {
-      var cur = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", cur);
-      try { localStorage.setItem("theme", cur); } catch (e) {}
+    var sw = $("#themeToggle"); if (!sw) return;
+    var doc = document.documentElement;
+
+    function sync() {
+      var dark = doc.getAttribute("data-theme") !== "light";
+      sw.setAttribute("aria-checked", dark ? "true" : "false");
+    }
+    sync();
+
+    var flashT = null;
+    sw.addEventListener("click", function () {
+      var next = doc.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      doc.setAttribute("data-theme", next);
+      try { localStorage.setItem("theme", next); } catch (e) {}
       syncThemeColor();
+      sync();
+
+      /* 切换瞬间的柔和高光：先点亮，再交给 CSS 慢慢淡掉 */
+      sw.classList.add("is-flash");
+      clearTimeout(flashT);
+      flashT = setTimeout(function () { sw.classList.remove("is-flash"); }, 70);
+    });
+
+    /* 按住时滑块「捏长」—— iOS 原生开关的招牌手感 */
+    sw.addEventListener("pointerdown", function () { sw.classList.add("is-pressing"); });
+    ["pointerup", "pointercancel", "pointerleave", "blur"].forEach(function (ev) {
+      sw.addEventListener(ev, function () { sw.classList.remove("is-pressing"); });
     });
   }
 
@@ -556,6 +577,9 @@
     burger.addEventListener("click", function () {
       var open = nav.classList.toggle("is-open");
       burger.setAttribute("aria-expanded", open ? "true" : "false");
+      /* 菜单展开时顶栏必须是满宽实色，否则下拉面板接不上 */
+      if (open) nav.classList.remove("is-mini", "is-float");
+      else if (scrollUpdate) scrollUpdate();
     });
 
     /* 手机上点菜单外面、或按 Esc 都能收起（符合触摸端直觉） */
@@ -574,34 +598,79 @@
   }
 
   /* ---------- 滚动 ---------- */
+  /* 让菜单开关能顺手刷新顶栏形态 */
+  var scrollUpdate = null;
+
   function initScroll() {
     var nav = $("#nav"), progress = $("#scrollProgress"), toTop = $("#toTop");
     var sections = $all("main section[id]");
     var links = $all("#navLinks .nav__link");
+    var parallax = $all("[data-parallax]");
     var ticking = false;
 
+    /* 缓存布局量：以前每帧都读 offsetTop / scrollHeight，会强制同步布局、拖慢滚动 */
+    var secTops = [], maxScroll = 1;
+    function measure() {
+      secTops = sections.map(function (s) { return s.offsetTop; });
+      maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    }
+
+    /* 顶栏形态：按滚动方向带阻尼地累积，避免手指微抖就来回切换 */
+    var lastY = window.scrollY || 0, upAcc = 0, downAcc = 0;
+
     function update() {
+      ticking = false;
       var y = window.scrollY || document.documentElement.scrollTop;
-      if (nav) nav.classList.toggle("is-scrolled", y > 8);
-      var max = document.documentElement.scrollHeight - window.innerHeight;
-      if (progress) progress.style.width = (max > 0 ? (y / max) * 100 : 0) + "%";
+      var d = y - lastY;
+      lastY = y;
+
+      if (nav) {
+        var menuOpen = nav.classList.contains("is-open");
+        /* ① 离开页首 → 收成悬浮胶囊 */
+        nav.classList.toggle("is-float", y > 16 && !menuOpen);
+
+        /* ② 继续下滑 → 再缩小上浮（iOS 26 的最小化）；上滑则立刻展开 */
+        if (menuOpen || y < 140) {
+          nav.classList.remove("is-mini");
+          upAcc = downAcc = 0;
+        } else {
+          if (d > 1.5) { downAcc += d; upAcc = 0; }
+          else if (d < -1.5) { upAcc -= d; downAcc = 0; }
+          if (downAcc > 70) nav.classList.add("is-mini");
+          if (upAcc > 30) nav.classList.remove("is-mini");
+        }
+      }
+
+      if (progress) progress.style.width = (y / maxScroll) * 100 + "%";
       if (toTop) toTop.classList.toggle("is-visible", y > 700);
 
-      var cur = "";
-      sections.forEach(function (s) { if (s.offsetTop - 140 <= y) cur = s.id; });
-      links.forEach(function (a) { a.classList.toggle("is-active", a.getAttribute("href") === "#" + cur); });
+      var cur = "", i;
+      for (i = 0; i < sections.length; i++) { if (secTops[i] - 140 <= y) cur = sections[i].id; }
+      for (i = 0; i < links.length; i++) {
+        links[i].classList.toggle("is-active", links[i].getAttribute("href") === "#" + cur);
+      }
 
       if (!reduceMotion) {
-        $all("[data-parallax]").forEach(function (n) {
-          var sp = parseFloat(n.getAttribute("data-parallax")) || 0.1;
-          n.style.transform = "translate3d(0," + (y * sp) + "px,0)";
-        });
+        for (i = 0; i < parallax.length; i++) {
+          var sp = parseFloat(parallax[i].getAttribute("data-parallax")) || 0.1;
+          parallax[i].style.transform = "translate3d(0," + (y * sp) + "px,0)";
+        }
       }
-      ticking = false;
     }
+    scrollUpdate = update;
+
     window.addEventListener("scroll", function () {
       if (!ticking) { ticking = true; requestAnimationFrame(update); }
     }, { passive: true });
+
+    var mt = null;
+    window.addEventListener("resize", function () {
+      clearTimeout(mt);
+      mt = setTimeout(function () { measure(); update(); }, 180);
+    });
+    window.addEventListener("load", function () { measure(); update(); });
+
+    measure();
     update();
     if (toTop) toTop.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: "smooth" }); });
   }
